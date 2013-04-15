@@ -1,0 +1,22 @@
+/* This is test input
+ * Comments are omitted
+ */
+{
+  numbers: [
+    0, -0, 1, -1,
+    23.45, -23.45,
+    1e2, -1e2, 1.3e4, -1.3e4,
+    1.5e+6, -1.5e+6, 77.88e-99, -77.88e-99,
+  ],
+  object: {
+    foo: bar, // identifiers are transformed into strings
+    plus-operation: +, // and even some lispy identifiers
+    'quux': null, // and single quoted strings are allowed
+    t: /* boolean */ true,
+    f: false,
+    say: 'Hello, "World"',
+    escaping1: "Foo \"bar'",
+    escaping2: 'Foo "bar\'',
+    escaping3: "Foo\nbar in \"quux\"",
+  }, // trailing comma
+}

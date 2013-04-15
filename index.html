@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Extended JSON</title>
+
+		<style type="text/css">
+			div {
+				padding: 0;
+				margin: 0;
+			}
+
+			code {
+				padding: 0 2px;
+				background: #eee;
+				border-radius: 2px;
+				border: 1px solid #ddd;
+			}
+
+			p, li, h1, h2 {
+				font-family: Georgia, Arial, Helvetica, serif;
+			}
+
+			p, li {
+				font-size: 10pt;
+				line-height: 1.3em;
+			}
+
+			code, textarea {
+				font-family: monospace;
+				font-size: 9pt;
+			}
+
+			.transform {
+				padding: 5px 0;
+				background: #eee;
+			}
+
+			.transform:after {
+				content: "";
+				clear: both;
+			}
+
+			.textarea-container {
+				float: left;
+				box-sizing: border-box;
+				width: 50%;
+				height: 400px;
+				padding: 5px 10px;
+				color: red;
+			}
+
+			@media screen and (max-width: 600px) {
+				.textarea-container {
+					float: none;
+					width: 100%;
+				}	
+			}
+
+			.textarea-container textarea {
+				padding: 5px 10px;
+				margin: 0;
+				background: #ddd;
+				box-sizing: border-box;
+				width: 100%;
+				height: 100%;
+				border: 1px solid #999;
+			}
+
+			.textarea-container textarea.error {
+				border: 1px solid #c00;
+				background: #fdd;
+			}
+
+			#errors {
+				clear: both;
+				margin: 10px;
+				padding: 10px;
+				border: 1px solid #c00;
+				color: #c00;
+				background: #fee;
+			}
+
+			#errors:empty {
+				display: none;
+			}
+
+			.buttons {
+				clear: both;
+				padding: 10px 10px 0;
+			}
+		</style>
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="ejson.js"></script>
+		<script>
+			$(function () {
+				"use strict";
+
+				var fromTextareaEl = $('#from-textarea');
+				var toTextareaEl = $('#to-textarea');
+				var errorsEl = $('#errors');
+
+				function transform() {
+					var t;
+					try {
+						/* global EJSON */
+						t = EJSON.transform(fromTextareaEl.val());
+						fromTextareaEl.removeClass('error');
+						errorsEl.html('');
+						toTextareaEl.val(t);
+					} catch (e) {
+						console.error(e);
+						fromTextareaEl.addClass('error');
+						errorsEl.html(e.toString());
+						return;
+					}
+
+					try {
+						JSON.parse(t);
+						toTextareaEl.removeClass('error');
+						errorsEl.html('');
+					} catch (e) {
+						console.error(e);
+						toTextareaEl.addClass('error');
+						errorsEl.html(e.toString());
+					}
+				}
+
+				function prettify() {
+					var t = toTextareaEl.val();
+
+					try {
+						toTextareaEl.val(JSON.stringify(JSON.parse(t), null, "  "));
+						toTextareaEl.removeClass('error');
+						errorsEl.html('');
+					} catch (e) {
+						console.error(e);
+						toTextareaEl.addClass('error');
+						errorsEl.html(e.toString());
+					}
+				}
+
+				// initial
+				transform();
+
+				// onclick
+				$('#transform-button').click(transform);
+				$('#prettify-button').click(prettify);
+
+				// scroll
+				fromTextareaEl.scroll(function () {
+					toTextareaEl.scrollTop(fromTextareaEl.scrollTop());
+				});
+
+				toTextareaEl.scroll(function () {
+					fromTextareaEl.scrollTop(toTextareaEl.scrollTop());
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<header>
+			<h1>Extended JSON</h1>
+		</header>
+		<article>
+			<p>Are you frustrated that you cannot add comments into your example JSON structure or easily strip them? Extended JSON is a simple solution. Small JavaScript library with only one exposed function <code>EJSON.transform <i>/* string &rarr; string */</i></code>.</p>
+			<p>Extended JSON (modified BSD license) is a strict superset of JSON. Valid JSON will not be changed by <code>EJSON.transform</code>. But in addition there are few extensions helping writing JSON by hand.</p>
+			<ul>
+				<li>Comments are stripped : <code>// foo</code> and <code>/* bar */</code> &rarr; <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>. Comments are converted into whitespace, so your formatting is preserved.</li>
+				<li>Trailing comma is allowed : <code> [1, 2, 3, ]</code> &rarr; <code> [1, 2, 3]</code>. Works also in objects <code>{ "foo": "bar", }</code> &rarr; <code>{ "foo": "bar" }</code>.</li>
+				<li>Identifiers are transformed into strings : <code>{ foo: bar }</code> &rarr; <code>{ "foo": "bar" }</code>.
+				<li>Single quoted strings are allowed : <code>'say "Hello"'</code> &rarr; <code>"say \"Hello\""</code>.
+			</ul>
+			<p>For the source code, see the <a href="https://github.com/phadej/ejson">GitHub repository</a>.
+
+			<h2>Example</h2>
+
+			<div class="transform">
+				<div id="errors"></div>
+				<div class="textarea-container">
+					<textarea id="from-textarea">/* This is test input
+ * Comments are omitted
+ */
+{
+  numbers: [
+    0, -0, 1, -1,
+    23.45, -23.45,
+    1e2, -1e2, 1.3e4, -1.3e4,
+    1.5e+6, -1.5e+6, 77.88e-99, -77.88e-99,
+  ],
+  object: {
+    foo: bar, // identifiers are transformed into strings
+    plus-operation: +, // and even some lispy identifiers
+    'quux': null, // and single quoted strings are allowed
+    t: /* boolean */ true,
+    f: false,
+    say: 'Hello, "World"',
+    escaping1: "Foo \"bar'",
+    escaping2: 'Foo "bar\'',
+    escaping3: "Foo\nbar in \"quux\"",
+  }, // trailing comma
+}
+</textarea>
+				</div>
+
+				<div class="textarea-container">
+					<textarea id="to-textarea"></textarea>
+				</div>
+
+				<div class="buttons">
+					<button id="transform-button">Transform</button>
+					<button id="prettify-button">Prettify</button>
+				</div>
+			</div>
+
+			<p><em>JSON Extended</em>, by <a href="http://oleg.fi/" title="Oleg Grenrus">Oleg Grenrus</a></p>
+		</article>
+	</body>
+</html>
