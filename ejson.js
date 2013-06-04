@@ -27,90 +27,40 @@
 (function () {
   "use strict";
 
-  function transform(contents) {
-    var tokenSpecs = (function (){
-      function f(type) {
-        return function(m) {
-          return { type: type, match: m[0] };
-        };
-      }
-
-      function fStringSingle(m) {
-        // String in single quotes
-        var content = m[1].replace(/([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})/g, function (m) {
-          if (m === '"') {
-            return '\\"';
-          } else if (m === "\\'") {
-            return "'";
-          } else {
-            return m;
-          }
-        });
-        return { type: "string", match: '"' + content + '"' };
-      }
-
-      function fIdentifier(m) {
-        // identifiers are transformed into strings
-        return { type: "string", match: '"' + m[0] + '"' };
-      }
-
-      function fComment(m) {
-        // comments are whitespace, leave only linefeeds
-        return { type: " ", match: m[0].replace(/./g, function (c) {
-			return /\s/.test(c) ? c : ' ';
-		}) };
-      }
-
-      return [
-        { re: /^\s+/, f: f(" ") },
-        { re: /^\{/, f: f("{") },
-        { re: /^\}/, f: f("}") },
-        { re: /^\[/, f: f("[") },
-        { re: /^\]/, f: f("]") },
-        { re: /^,/, f: f(",") },
-        { re: /^:/, f: f(":") },
-        { re: /^(true|false|null)/, f: f("keyword") },
-        { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: f("number") },
-        { re: /^"([^"\\]|\\["bnrt\/]|\\u[0-9a-fA-F]{4})*"/, f: f("string") },
-        // additional stuff
-        { re: /^'(([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
-        { re: /^[a-zA-Z_\-+][a-zA-Z0-9_\-+]*/, f: fIdentifier },
-        { re: /^\/\/.*?\n/, f: fComment },
-        { re: /^\/\*[\s\S]*?\*\//, f: fComment },
-      ];
-    }());
-
-    // slightly different from ES5 some, without cast to boolean
-    // [x, y, z].some(f):
-    // ES5:  !! ( f(x) || f(y) || f(z) || false)
-    // this:    ( f(x) || f(y) || f(z) || false)
-    function some(array, f) {
-      if (array.length === 0) {
-        return false;
-      }
-
-      var acc;
-      for (var i = 0; i < array.length; i++) {
-        acc = f(array[i], i, array);
-        if (acc) {
-          return acc;
-        }
-      }
-      return acc;
+  // slightly different from ES5 some, without cast to boolean
+  // [x, y, z].some(f):
+  // ES5:  !! ( f(x) || f(y) || f(z) || false)
+  // this:    ( f(x) || f(y) || f(z) || false)
+  function some(array, f) {
+    if (array.length === 0) {
+      return false;
     }
 
-    // Tokenize contents
-    var tokens = (function (contents) {
+    var acc;
+    for (var i = 0; i < array.length; i++) {
+      acc = f(array[i], i, array);
+      if (acc) {
+        return acc;
+      }
+    }
+    return acc;
+  }
+
+  function makeLexer(tokenSpecs) {
+    return function (contents) {
       var tokens = [];
-      var line = 1; // TODO
+      var line = 1;
 
       function findToken() {
         return some(tokenSpecs, function (tokenSpec) {
           var m = tokenSpec.re.exec(contents);
           if (m) {
-            var matched = m[0];
-            contents = contents.slice(matched.length);
-            return tokenSpec.f(m);
+            var raw = m[0];
+            contents = contents.slice(raw.length);
+            return {
+              raw: raw,
+              matched: tokenSpec.f(m),
+            };
           }
         });
       }
@@ -118,19 +68,77 @@
       while (contents !== "") {
         var matched = findToken();
 
-
         if (!matched) {
           throw new Error("Cannot tokenize on line " + line);
         } else {
           // count lines
-          line += matched.match.replace(/[^\n]/g, '').length;
+          line += matched.raw.replace(/[^\n]/g, '').length;
         }
 
-        tokens.push(matched);
+        tokens.push(matched.matched);
       }
 
       return tokens;
-    }(contents));
+    };
+  }
+
+  var tokenSpecs = (function (){
+    function f(type) {
+      return function(m) {
+        return { type: type, match: m[0] };
+      };
+    }
+
+    function fStringSingle(m) {
+      // String in single quotes
+      var content = m[1].replace(/([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})/g, function (m) {
+        if (m === '"') {
+          return '\\"';
+        } else if (m === "\\'") {
+          return "'";
+        } else {
+          return m;
+        }
+      });
+      return { type: "string", match: '"' + content + '"' };
+    }
+
+    function fIdentifier(m) {
+      // identifiers are transformed into strings
+      return { type: "string", match: '"' + m[0] + '"' };
+    }
+
+    function fComment(m) {
+      // comments are whitespace, leave only linefeeds
+      return { type: " ", match: m[0].replace(/./g, function (c) {
+        return (/\s/).test(c) ? c : ' ';
+      }) };
+    }
+
+    return [
+      { re: /^\s+/, f: f(" ") },
+      { re: /^\{/, f: f("{") },
+      { re: /^\}/, f: f("}") },
+      { re: /^\[/, f: f("[") },
+      { re: /^\]/, f: f("]") },
+      { re: /^,/, f: f(",") },
+      { re: /^:/, f: f(":") },
+      { re: /^(true|false|null)/, f: f("keyword") },
+      { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: f("number") },
+      { re: /^"([^"\\]|\\["bnrt\/]|\\u[0-9a-fA-F]{4})*"/, f: f("string") },
+      // additional stuff
+      { re: /^'(([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
+      { re: /^[a-zA-Z_\-+][a-zA-Z0-9_\-+]*/, f: fIdentifier },
+      { re: /^\/\/.*?\n/, f: fComment },
+      { re: /^\/\*[\s\S]*?\*\//, f: fComment },
+    ];
+  }());
+
+  var lexer = makeLexer(tokenSpecs);
+
+  function transform(contents) {
+    // Tokenize contents
+    var tokens = lexer(contents);
 
     // remove trailing commas
     tokens = tokens.reduce(function (tokens, token) {
@@ -166,13 +174,21 @@
   }
 
   // Export  stuff
+  var module = {
+    transform: transform,
+    makeLexer: makeLexer,
+  };
+
   if (typeof window !== "undefined") {
     /* global window */
-    window.EJSON = {
-      transform: transform,
-    };
+    window.EJSON = module;
   } else if (typeof exports !== "undefined") {
     /* global exports */
-    exports.transform = transform;
+    for (var k in module) {
+      // Check to make jshint happy
+      if (Object.prototype.hasOwnProperty.call(module, k)) {
+        exports[k] = module[k];
+      }
+    }
   }
 }());

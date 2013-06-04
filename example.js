@@ -12,7 +12,7 @@
   try {
     json = JSON.parse(contents);
   } catch (e) {
-    console.error(e);
+    console.error("Expected json error: ", e);
   }
 
   try {
