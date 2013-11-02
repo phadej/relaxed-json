@@ -8,8 +8,16 @@ JavaScript library with only one exposed function `EJSON.transform /* string →
 will not be changed by `RJSON.transform`. But in addition there are few
 extensions helping writing JSON by hand.
 
-* Comments are stripped : `// foo` and `/* bar */`  → `     `. Comments are converted into whitespace, so your formatting is preserved.
+* Comments are stripped : `// foo` and `/* bar */`  → `     `.
+  Comments are converted into whitespace, so your formatting is preserved.
 * Trailing comma is allowed : `[1, 2, 3, ]` → `[1, 2, 3]`. Works also in objects `{ "foo": "bar", }` → `{ "foo": "bar" }`.
 * Identifiers are transformed into strings : `{ foo: bar }` → `{ "foo": "bar" }`.
 * Single quoted strings are allowed : `'say "Hello"'` → `"say \"Hello\""`.
+* More different characters is supported for identifiers: `foo-bar` → `"foo-bar"`.
 
+## API
+
+- `RJSON.transform(text : string) : string`.
+  Transforms Relaxed JSON text into JSON text. Doesn't verify (parse) the JSON, i.e result JSON might be invalid as well
+- `RJSON.parse(text : string, reviver : function) : obj`.
+  Parse the RJSON text.

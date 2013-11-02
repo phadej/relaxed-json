@@ -14,6 +14,13 @@ module.exports = function(grunt) {
       src: {
         src: "relaxed-json.js"
       },
+      webcli: {
+        src: "web/cli.js",
+        options: {
+          browser: true,
+          node: false,
+        },
+      },
     },
   });
 

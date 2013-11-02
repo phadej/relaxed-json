@@ -88,6 +88,10 @@
 
 			.textarea-container .error {
 				border: 1px solid #c00;
+				background: #fee;
+			}
+
+			.textarea-container .error-line {
 				background: #fdd;
 			}
 
@@ -113,55 +117,7 @@
 		<script src="lib/codemirror.js"></script>
 		<script src="lib/cm-mode-javascript.js"></script>
 		<script src="relaxed-json.js"></script>
-		<script>
-			$(function () {
-				"use strict";
-
-				var fromTextareaEl = $('#area-from textarea');
-				var toTextareaEl = $('#area-to textarea');
-				var prettifyEl = $('#prettify-checkbox:checkbox');
-				var errorsEl = $('#errors');
-
-				/* global CodeMirror */
-				var cmFrom = CodeMirror.fromTextArea(fromTextareaEl[0], {
-					mode: "javascript",
-				});
-
-				var cmTo = CodeMirror.fromTextArea(toTextareaEl[0], {
-					mode: "javascript",
-				});
-
-				var fromCmEl = $('#area-from .CodeMirror');
-
-				function transform() {
-					var t;
-					var v;
-					try {
-						/* global RJSON */
-						t = RJSON.transform(cmFrom.getValue());
-						errorsEl.html('');
-						v = JSON.parse(t);
-						fromCmEl.removeClass('error');
-					} catch (e) {
-						fromCmEl.addClass('error');
-						console.error(e);
-						errorsEl.html(e.toString());
-						return;
-					}
-
-					if (prettifyEl.is(":checked")) {
-						cmTo.setValue(v ? JSON.stringify(v, null, "  ") : t);
-					} else {
-						cmTo.setValue(t);
-					}
-				}
-
-				// initial
-				transform();
-
-				// onclick
-				cmFrom.on("change", transform);
-			});
+		<script src="cli.js"></script>
 		</script>
 	</head>
 	<body>

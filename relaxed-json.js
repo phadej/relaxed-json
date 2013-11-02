@@ -59,7 +59,7 @@
             contents = contents.slice(raw.length);
             return {
               raw: raw,
-              matched: tokenSpec.f(m),
+              matched: tokenSpec.f(m, line),
             };
           }
         });
@@ -69,11 +69,16 @@
         var matched = findToken();
 
         if (!matched) {
-          throw new Error("Cannot tokenize on line " + line);
-        } else {
-          // count lines
-          line += matched.raw.replace(/[^\n]/g, "").length;
+          var err = new SyntaxError("RJSON: Unexpected token: " + contents[0]);
+          err.line = line;
+          throw err;
         }
+
+        // add line to token
+        matched.matched.line = line;
+
+        // count lines
+        line += matched.raw.replace(/[^\n]/g, "").length;
 
         tokens.push(matched.matched);
       }
@@ -91,7 +96,7 @@
 
     function fStringSingle(m) {
       // String in single quotes
-      var content = m[1].replace(/([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})/g, function (m) {
+      var content = m[1].replace(/([^'\\]|\\['bnrt\\]|\\u[0-9a-fA-F]{4})/g, function (m) {
         if (m === "\"") {
           return "\\\"";
         } else if (m === "\\'") {
@@ -127,23 +132,19 @@
       { re: /^:/, f: f(":") },
       { re: /^(true|false|null)/, f: f("keyword") },
       { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: f("number") },
-      { re: /^"([^"\\]|\\["bnrt\/]|\\u[0-9a-fA-F]{4})*"/, f: f("string") },
+      { re: /^"([^"\\]|\\["bnrt\\]|\\u[0-9a-fA-F]{4})*"/, f: f("string") },
       // additional stuff
-      { re: /^'(([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
+      { re: /^'(([^'\\]|\\['bnrt\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
       { re: /^\/\/.*?\n/, f: fComment },
       { re: /^\/\*[\s\S]*?\*\//, f: fComment },
-      { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\\\/]+/, f: fIdentifier },
+      { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
     ];
   }());
 
   var lexer = makeLexer(tokenSpecs);
 
-  function transform(contents) {
-    // Tokenize contents
-    var tokens = lexer(contents);
-
-    // remove trailing commas
-    tokens = tokens.reduce(function (tokens, token) {
+  function transformTokens(tokens) {
+    return tokens.reduce(function (tokens, token) {
       // not so functional, js list aren't
 
       // do stuff only if curren token is ] or }
@@ -168,6 +169,14 @@
 
       return tokens;
     }, []);
+  }
+
+  function transform(contents) {
+    // Tokenize contents
+    var tokens = lexer(contents);
+
+    // remove trailing commas
+    tokens = transformTokens(tokens);
 
     // concat stuff
     return tokens.reduce(function (str, token) {
@@ -175,10 +184,14 @@
     }, "");
   }
 
+  function parse(text, reviver) {
+    return JSON.parse(transform(text), reviver);
+  }
+
   // Export  stuff
   var module = {
     transform: transform,
-    makeLexer: makeLexer,
+    parse: parse,
   };
 
   /* global window, exports */
