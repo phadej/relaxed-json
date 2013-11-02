@@ -51,7 +51,6 @@ module.exports = function(grunt) {
     less: {
       web: {
         src: [
-          "components/codemirror.css",
           "web.less",
         ],
         dest: "web.min.css",
