@@ -3,7 +3,21 @@
 	<head>
 		<title>Extended JSON</title>
 
+		<link rel="stylesheet" href="lib/codemirror.css">
 		<style type="text/css">
+			@font-face {
+				font-family: "Computer Modern";
+				src: url('fonts/cmunrm.otf');
+			}
+			@font-face {
+				font-family: "Computer Modern Bold";
+				src: url('fonts/cmunrb.otf');
+			}
+			@font-face {
+				font-family: "Computer Modern TT";
+				src: url('fonts/cmuntt.otf');
+			}
+
 			div {
 				padding: 0;
 				margin: 0;
@@ -16,18 +30,22 @@
 				border: 1px solid #ddd;
 			}
 
-			p, li, h1, h2 {
-				font-family: Georgia, Arial, Helvetica, serif;
+			p, li, label {
+				font-family: "Computer Modern", Helvetica, serif;
 			}
 
-			p, li {
-				font-size: 10pt;
+			h1, h2 {
+				font-family: "Computer Modern Bold", Helvetica, serif;
+			}
+
+			p, li, label {
+				font-size: 11pt;
 				line-height: 1.3em;
 			}
 
-			code, textarea {
-				font-family: monospace;
-				font-size: 9pt;
+			code, textarea, pre, .CodeMirror {
+				font-family: 'Computer Modern TT', monospace;
+				font-size: 10pt;
 			}
 
 			.transform {
@@ -93,7 +111,6 @@
 		<script src="lib/jquery-2.0.3.js"></script>
 		<script src="lib/codemirror.js"></script>
 		<script src="lib/cm-mode-javascript.js"></script>
-		<link rel="stylesheet" href="lib/codemirror.css">
 		<script src="ejson.js"></script>
 		<script>
 			$(function () {
