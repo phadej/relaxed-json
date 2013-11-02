@@ -105,7 +105,9 @@
 
     function fIdentifier(m) {
       // identifiers are transformed into strings
-      return { type: "string", match: '"' + m[0] + '"' };
+      return { type: "string", match: '"' + m[0].replace(/./g, function (c) {
+        return c === "\\" ? "\\\\" : c;
+      }) + '"' };
     }
 
     function fComment(m) {
@@ -128,9 +130,9 @@
       { re: /^"([^"\\]|\\["bnrt\/]|\\u[0-9a-fA-F]{4})*"/, f: f("string") },
       // additional stuff
       { re: /^'(([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
-      { re: /^[a-zA-Z_\-+][a-zA-Z0-9_\-+]*/, f: fIdentifier },
       { re: /^\/\/.*?\n/, f: fComment },
       { re: /^\/\*[\s\S]*?\*\//, f: fComment },
+      { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\\\/]+/, f: fIdentifier },
     ];
   }());
 
