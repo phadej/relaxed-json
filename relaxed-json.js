@@ -69,7 +69,7 @@
         var matched = findToken();
 
         if (!matched) {
-          var err = new SyntaxError("RJSON: Unexpected token: " + contents[0]);
+          var err = new SyntaxError("Unexpected character: " + contents[0]);
           err.line = line;
           throw err;
         }
@@ -105,12 +105,28 @@
           return m;
         }
       });
-      return { type: "string", match: "\"" + content + "\""  };
+
+      return {
+        type: "string",
+        match: "\"" + content + "\"",
+        value: JSON.parse("\"" + content + "\""), // abusing real JSON.parse to unquote string
+      };
+    }
+
+    function fStringDouble(m) {
+      return {
+        type: "string",
+        match: m[0],
+        value: JSON.parse(m[0]),
+      };
     }
 
     function fIdentifier(m) {
       // identifiers are transformed into strings
-      return { type: "string", match: "\"" + m[0].replace(/./g, function (c) {
+      return {
+        type: "string",
+        value: m[0],
+        match: "\"" + m[0].replace(/./g, function (c) {
         return c === "\\" ? "\\\\" : c;
       }) + "\"" };
     }
@@ -122,6 +138,14 @@
       }) };
     }
 
+    function fNumber(m) {
+      return {
+        type : "number",
+        match: m[0],
+        value: parseFloat(m[0]),
+      };
+    }
+
     return [
       { re: /^\s+/, f: f(" ") },
       { re: /^\{/, f: f("{") },
@@ -131,8 +155,8 @@
       { re: /^,/, f: f(",") },
       { re: /^:/, f: f(":") },
       { re: /^(true|false|null)/, f: f("keyword") },
-      { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: f("number") },
-      { re: /^"([^"\\]|\\["bnrt\\]|\\u[0-9a-fA-F]{4})*"/, f: f("string") },
+      { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: fNumber },
+      { re: /^"([^"\\]|\\["bnrt\\]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
       // additional stuff
       { re: /^'(([^'\\]|\\['bnrt\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
       { re: /^\/\/.*?\n/, f: fComment },
@@ -171,9 +195,9 @@
     }, []);
   }
 
-  function transform(contents) {
+  function transform(text) {
     // Tokenize contents
-    var tokens = lexer(contents);
+    var tokens = lexer(text);
 
     // remove trailing commas
     tokens = transformTokens(tokens);
@@ -188,10 +212,185 @@
     return JSON.parse(transform(text), reviver);
   }
 
+  function popToken(tokens) {
+    var token = tokens.shift();
+    if (!token) {
+       var err = new SyntaxError("Unexpected end-of-file");
+      throw err;
+    }
+    return token;
+  }
+
+  function parseObject(tokens, reviver) {
+    var token = popToken(tokens);
+    var obj = {};
+    var key, colon, value;
+    var err;
+
+    switch (token.type) {
+    case "}":
+      return {};
+
+    case "string":
+      key = token.value;
+      colon = popToken(tokens);
+      if (colon.type !== ":") {
+        err = new SyntaxError("Unexpected token: " + colon.type + ", expected colon");
+        err.line = token.line;
+        throw err;
+      }
+      value = parseAny(tokens, reviver);
+
+      value = reviver ? reviver(key, value) : value;
+      if (value !== undefined) {
+        obj[key] = value;
+      }
+      break;
+
+    default:
+      err = new SyntaxError("Unexpected token: " + token.type + ", expected string or }");
+      err.line = token.line;
+      throw err;
+    }
+
+    // Rest
+    while (true) {
+      token = popToken(tokens);
+
+      switch (token.type) {
+      case "}":
+        return obj;
+
+      case ",":
+        token = popToken(tokens);
+        if (token.type !== "string") {
+          err = new SyntaxError("Unexpected token: " + token.type + ", expected string");
+          err.line = token.line;
+          throw err;
+        }
+        key = token.value;
+        colon = popToken(tokens);
+        if (colon.type !== ":") {
+          err = new SyntaxError("Unexpected token: " + colon.type + ", expected colon");
+          err.line = token.line;
+          throw err;
+        }
+        value = parseAny(tokens, reviver);
+
+        value = reviver ? reviver(key, value) : value;
+        if (value !== undefined) {
+          obj[key] = value;
+        }
+        break;
+
+        default:
+          err = new SyntaxError("Unexpected token: " + token.type + ", expected , or }");
+          err.line = token.line;
+          throw err;
+      }
+    }
+  }
+
+  function parseArray(tokens, reviver) {
+    var token = popToken(tokens);
+    var arr = [];
+    var key = 0, value;
+    var err;
+
+    switch (token.type) {
+    case "]":
+      return [];
+
+    default:
+      tokens.unshift(token);
+      value = parseAny(tokens, reviver);
+
+      arr[key] = reviver ? reviver(key, value) : value;
+      break;
+    }
+
+    // Rest
+    while (true) {
+      token = popToken(tokens);
+
+      switch (token.type) {
+        case "]":
+          return arr;
+
+        case ",":
+          key += 1;
+          value = parseAny(tokens, reviver);
+          arr[key] = reviver ? reviver(key, value) : value;
+          break;
+
+        default:
+          err = new SyntaxError("Unexpected token: " + token.type + ", expected , or }");
+          err.line = token.line;
+          throw err;
+      }
+    }
+  }
+
+  function parseAny(tokens, reviver, end) {
+    var token = popToken(tokens);
+    var ret;
+    var err;
+
+    switch (token.type) {
+    case "{":
+      ret = parseObject(tokens, reviver);
+      ret = reviver ? reviver("", ret) : ret;
+      break;
+    case "[":
+      ret = parseArray(tokens, reviver);
+      ret = reviver ? reviver("", ret) : ret;
+      break;
+    case "string":
+    case "number":
+      ret = token.value;
+      break;
+    case "keyword":
+      switch (token.match) {
+        case "null": ret = null; break;
+        case "true": ret = true; break;
+        case "false": ret = false; break;
+      }
+      break;
+    default:
+      err = new SyntaxError("Unexpected token: " + token.type);
+      err.line = token.line;
+      throw err;
+    }
+
+    if (end && tokens.length !== 0) {
+      err = new SyntaxError("Unexpected token: " + tokens[0].type + ", expected end-of-input");
+      err.line = tokens[0].line;
+      throw err;
+    }
+
+    return ret;
+  }
+
+  function parse2(text, reviver) {
+    // Tokenize contents
+    var tokens = lexer(text);
+
+    // remove trailing commas
+    tokens = transformTokens(tokens);
+
+    tokens = tokens.filter(function (token) {
+      return token.type !== " ";
+    });
+
+    // concat stuff
+    return parseAny(tokens, reviver, true);
+  }
+
   // Export  stuff
   var module = {
     transform: transform,
     parse: parse,
+    parse2: parse2,
   };
 
   /* global window, exports */

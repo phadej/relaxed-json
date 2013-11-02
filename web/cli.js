@@ -1,8 +1,6 @@
-/* global $, CodeMirror, RJSON */
+/* global $, CodeMirror, RJSON, -console */
 $(function () {
 	"use strict";
-
-	console.log("loaded");
 
 	var fromTextareaEl = $("#area-from textarea");
 	var toTextareaEl = $("#area-to textarea");
@@ -34,13 +32,13 @@ $(function () {
 			errorsEl.html("");
 			var i = cmFrom.getValue();
 			t = RJSON.transform(i);
-			v = RJSON.parse(i);
+			v = RJSON.parse2(i);
 			fromCmEl.removeClass("error");
 			clearErrorLine();
 		} catch (e) {
 			fromCmEl.addClass("error");
 			if (e && e.line) {
-				console.log(e.line, typeof e.line, e.message);
+				clearErrorLine();
 				errorLineH = cmFrom.getLineHandle(e.line - 1);
 				if (errorLineH) {
 					cmFrom.addLineClass(errorLineH, "background", "error-line");
@@ -61,5 +59,6 @@ $(function () {
 	transform();
 
 	// onclick
+	prettifyEl.on("change", transform);
 	cmFrom.on("change", transform);
 });

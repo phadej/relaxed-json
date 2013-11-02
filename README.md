@@ -20,4 +20,6 @@ extensions helping writing JSON by hand.
 - `RJSON.transform(text : string) : string`.
   Transforms Relaxed JSON text into JSON text. Doesn't verify (parse) the JSON, i.e result JSON might be invalid as well
 - `RJSON.parse(text : string, reviver : function) : obj`.
-  Parse the RJSON text.
+  Parse the RJSON text, virtually `JSON.parse(JSON.transform(text), reviver)`.
+- `RJSON.parse2(text : string, reviver : function) : obj`.
+  This is self-made parser function, which should act as `RJSON.parse`, but provides better error messages.
