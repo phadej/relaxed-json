@@ -46,6 +46,7 @@
 			code, textarea, pre, .CodeMirror {
 				font-family: 'Computer Modern TT', monospace;
 				font-size: 10pt;
+				line-height: 1em;
 			}
 
 			.transform {
@@ -85,7 +86,7 @@
 				border: 1px solid #999;
 			}
 
-			.textarea-container textarea.error {
+			.textarea-container .error {
 				border: 1px solid #c00;
 				background: #fdd;
 			}
@@ -116,36 +117,42 @@
 			$(function () {
 				"use strict";
 
-				var fromTextareaEl = $('#from-textarea');
-				var toTextareaEl = $('#to-textarea');
+				var fromTextareaEl = $('#area-from textarea');
+				var toTextareaEl = $('#area-to textarea');
 				var prettifyEl = $('#prettify-checkbox:checkbox');
 				var errorsEl = $('#errors');
 
 				/* global CodeMirror */
-				var cm = CodeMirror.fromTextArea(fromTextareaEl[0], {
+				var cmFrom = CodeMirror.fromTextArea(fromTextareaEl[0], {
 					mode: "javascript",
 				});
+
+				var cmTo = CodeMirror.fromTextArea(toTextareaEl[0], {
+					mode: "javascript",
+				});
+
+				var fromCmEl = $('#area-from .CodeMirror');
 
 				function transform() {
 					var t;
 					var v;
 					try {
 						/* global RJSON */
-						t = RJSON.transform(cm.getValue());
-						fromTextareaEl.removeClass('error');
+						t = RJSON.transform(cmFrom.getValue());
 						errorsEl.html('');
 						v = JSON.parse(t);
+						fromCmEl.removeClass('error');
 					} catch (e) {
+						fromCmEl.addClass('error');
 						console.error(e);
-						fromTextareaEl.addClass('error');
 						errorsEl.html(e.toString());
 						return;
 					}
 
 					if (prettifyEl.is(":checked")) {
-						toTextareaEl.val(v ? JSON.stringify(v, null, "  ") : t);
+						cmTo.setValue(v ? JSON.stringify(v, null, "  ") : t);
 					} else {
-						toTextareaEl.val(t);
+						cmTo.setValue(t);
 					}
 				}
 
@@ -153,16 +160,7 @@
 				transform();
 
 				// onclick
-				cm.on("change", transform);
-
-				// scroll
-				fromTextareaEl.scroll(function () {
-					toTextareaEl.scrollTop(fromTextareaEl.scrollTop());
-				});
-
-				toTextareaEl.scroll(function () {
-					fromTextareaEl.scrollTop(toTextareaEl.scrollTop());
-				});
+				cmFrom.on("change", transform);
 			});
 		</script>
 	</head>
@@ -184,8 +182,8 @@
 			<h2>Example</h2>
 
 			<div class="transform">
-				<div class="textarea-container">
-					<textarea id="from-textarea">/* This is a test input
+				<div id="area-from" class="textarea-container">
+					<textarea>/* This is a test input
  * Comments are omitted
  */
 {
@@ -211,8 +209,8 @@
 </textarea>
 				</div>
 
-				<div class="textarea-container">
-					<textarea id="to-textarea"></textarea>
+				<div id="area-to" class="textarea-container">
+					<textarea></textarea>
 				</div>
 
 				<div id="errors"></div>
