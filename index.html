@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Extended JSON</title>
+		<title>Relaxed JSON</title>
 
 		<link rel="stylesheet" href="lib/codemirror.css">
 		<style type="text/css">
@@ -111,7 +111,7 @@
 		<script src="lib/jquery-2.0.3.js"></script>
 		<script src="lib/codemirror.js"></script>
 		<script src="lib/cm-mode-javascript.js"></script>
-		<script src="ejson.js"></script>
+		<script src="relaxed-json.js"></script>
 		<script>
 			$(function () {
 				"use strict";
@@ -121,6 +121,7 @@
 				var prettifyEl = $('#prettify-checkbox:checkbox');
 				var errorsEl = $('#errors');
 
+				/* global CodeMirror */
 				var cm = CodeMirror.fromTextArea(fromTextareaEl[0], {
 					mode: "javascript",
 				});
@@ -129,8 +130,8 @@
 					var t;
 					var v;
 					try {
-						/* global EJSON */
-						t = EJSON.transform(cm.getValue());
+						/* global RJSON */
+						t = RJSON.transform(cm.getValue());
 						fromTextareaEl.removeClass('error');
 						errorsEl.html('');
 						v = JSON.parse(t);
@@ -167,11 +168,11 @@
 	</head>
 	<body>
 		<header>
-			<h1>Extended JSON</h1>
+			<h1>Relaxed JSON</h1>
 		</header>
 		<article>
-			<p>Are you frustrated that you cannot add comments into your example JSON structure or easily strip them? Extended JSON is a simple solution. Small JavaScript library with only one exposed function <code>EJSON.transform <i>/* string &rarr; string */</i></code>.</p>
-			<p>Extended JSON (modified BSD license) is a strict superset of JSON. Valid JSON will not be changed by <code>EJSON.transform</code>. But in addition there are few extensions helping writing JSON by hand.</p>
+			<p>Are you frustrated that you cannot add comments into your example JSON structure or easily strip them? Relaxed JSON is a simple solution. Small JavaScript library with only one exposed function <code>RJSON.transform <i>/* string &rarr; string */</i></code>.</p>
+			<p>Relaxed JSON (modified BSD license) is a strict superset of JSON. Valid JSON will not be changed by <code>RJSON.transform</code>. But in addition there are few extensions helping writing JSON by hand.</p>
 			<ul>
 				<li>Comments are stripped : <code>// foo</code> and <code>/* bar */</code> &rarr; <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>. Comments are converted into whitespace, so your formatting is preserved.</li>
 				<li>Trailing comma is allowed : <code> [1, 2, 3, ]</code> &rarr; <code> [1, 2, 3]</code>. Works also in objects <code>{ "foo": "bar", }</code> &rarr; <code>{ "foo": "bar" }</code>.</li>
@@ -220,7 +221,7 @@
 				</div>
 			</div>
 
-			<p><em>JSON Extended</em>, by <a href="http://oleg.fi/" title="Oleg Grenrus">Oleg Grenrus</a></p>
+			<p><em>Relaxed JSON</em>, by <a href="http://oleg.fi/" title="Oleg Grenrus">Oleg Grenrus</a></p>
 		</article>
 
 		<a href="https://github.com/phadej/ejson"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>

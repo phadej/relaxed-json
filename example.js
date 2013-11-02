@@ -3,10 +3,10 @@
 
   // require
   var fs = require("fs");
-  var ejson = require("./ejson.js");
+  var rjson = require("./relaxed-json.js");
 
-  var contents = fs.readFileSync("example.ejson").toString();
-  var contentsT = ejson.transform(contents);
+  var contents = fs.readFileSync("example.rjson").toString();
+  var contentsT = rjson.transform(contents);
 
   var json;
   try {

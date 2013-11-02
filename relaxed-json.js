@@ -72,7 +72,7 @@
           throw new Error("Cannot tokenize on line " + line);
         } else {
           // count lines
-          line += matched.raw.replace(/[^\n]/g, '').length;
+          line += matched.raw.replace(/[^\n]/g, "").length;
         }
 
         tokens.push(matched.matched);
@@ -92,28 +92,28 @@
     function fStringSingle(m) {
       // String in single quotes
       var content = m[1].replace(/([^'\\]|\\['bnrt\/]|\\u[0-9a-fA-F]{4})/g, function (m) {
-        if (m === '"') {
-          return '\\"';
+        if (m === "\"") {
+          return "\\\"";
         } else if (m === "\\'") {
           return "'";
         } else {
           return m;
         }
       });
-      return { type: "string", match: '"' + content + '"' };
+      return { type: "string", match: "\"" + content + "\""  };
     }
 
     function fIdentifier(m) {
       // identifiers are transformed into strings
-      return { type: "string", match: '"' + m[0].replace(/./g, function (c) {
+      return { type: "string", match: "\"" + m[0].replace(/./g, function (c) {
         return c === "\\" ? "\\\\" : c;
-      }) + '"' };
+      }) + "\"" };
     }
 
     function fComment(m) {
       // comments are whitespace, leave only linefeeds
       return { type: " ", match: m[0].replace(/./g, function (c) {
-        return (/\s/).test(c) ? c : ' ';
+        return (/\s/).test(c) ? c : " ";
       }) };
     }
 
@@ -147,15 +147,15 @@
       // not so functional, js list aren't
 
       // do stuff only if curren token is ] or }
-      if (tokens.length !== 0 && (token.type === ']' || token.type === '}')) {
+      if (tokens.length !== 0 && (token.type === "]" || token.type === "}")) {
         var i = tokens.length - 1;
 
         // go backwards as long as there is whitespace, until first comma
         while (true) {
-          if (tokens[i].type === ' ') {
+          if (tokens[i].type === " ") {
             i -= 1;
             continue;
-          } else if (tokens[i].type === ',') {
+          } else if (tokens[i].type === ",") {
             // remove comma
             tokens.splice(i, 1);
           }
@@ -181,11 +181,10 @@
     makeLexer: makeLexer,
   };
 
+  /* global window, exports */
   if (typeof window !== "undefined") {
-    /* global window */
-    window.EJSON = module;
+    window.RJSON = module;
   } else if (typeof exports !== "undefined") {
-    /* global exports */
     for (var k in module) {
       // Check to make jshint happy
       if (Object.prototype.hasOwnProperty.call(module, k)) {

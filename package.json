@@ -1,0 +1,38 @@
+{
+  "name": "relaxed-json",
+  "description": "relaxed JSON is strict superset JSON, relaxing strictness of JSON format",
+  "version": "0.0.1",
+  "homepage": "https://github.com/phadej/relaxed-json",
+  "author": {
+    "name": "Oleg Grenrus",
+    "email": "oleg.grenrus@iki.fi",
+    "url": "http://oleg.fi/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/phadej/relaxed-json.git"
+  },
+  "bugs": {
+    "url": "https://github.com/phadej/relaxed-json/issues"
+  },
+  "licenses": [
+    {
+      "type": "BSD3",
+      "url": "https://github.com/phadej/relaxed-json/blob/master/LICENSE"
+    }
+  ],
+  "main": "relaxed-json.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt": "~0.4.1"
+  },
+  "keywords": [
+    "json"
+  ]
+}
