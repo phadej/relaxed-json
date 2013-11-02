@@ -92,6 +92,7 @@
 		</style>
 		<script src="lib/jquery-2.0.3.js"></script>
 		<script src="lib/codemirror.js"></script>
+		<script src="lib/cm-mode-javascript.js"></script>
 		<link rel="stylesheet" href="lib/codemirror.css">
 		<script src="ejson.js"></script>
 		<script>
@@ -103,7 +104,9 @@
 				var prettifyEl = $('#prettify-checkbox:checkbox');
 				var errorsEl = $('#errors');
 
-				var cm = CodeMirror.fromTextArea(fromTextareaEl[0]);
+				var cm = CodeMirror.fromTextArea(fromTextareaEl[0], {
+					mode: "javascript",
+				});
 
 				function transform() {
 					var t;
