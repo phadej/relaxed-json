@@ -56,7 +56,8 @@
 				}	
 			}
 
-			.textarea-container textarea {
+			.textarea-container textarea,
+			.textarea-container .CodeMirror {
 				padding: 5px 10px;
 				margin: 0;
 				background: #ddd;
@@ -89,7 +90,9 @@
 				padding: 10px 10px 0;
 			}
 		</style>
-		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="lib/jquery-2.0.3.js"></script>
+		<script src="lib/codemirror.js"></script>
+		<link rel="stylesheet" href="lib/codemirror.css">
 		<script src="ejson.js"></script>
 		<script>
 			$(function () {
@@ -97,16 +100,20 @@
 
 				var fromTextareaEl = $('#from-textarea');
 				var toTextareaEl = $('#to-textarea');
+				var prettifyEl = $('#prettify-checkbox:checkbox');
 				var errorsEl = $('#errors');
+
+				var cm = CodeMirror.fromTextArea(fromTextareaEl[0]);
 
 				function transform() {
 					var t;
+					var v;
 					try {
 						/* global EJSON */
-						t = EJSON.transform(fromTextareaEl.val());
+						t = EJSON.transform(cm.getValue());
 						fromTextareaEl.removeClass('error');
 						errorsEl.html('');
-						toTextareaEl.val(t);
+						v = JSON.parse(t);
 					} catch (e) {
 						console.error(e);
 						fromTextareaEl.addClass('error');
@@ -114,28 +121,10 @@
 						return;
 					}
 
-					try {
-						JSON.parse(t);
-						toTextareaEl.removeClass('error');
-						errorsEl.html('');
-					} catch (e) {
-						console.error(e);
-						toTextareaEl.addClass('error');
-						errorsEl.html(e.toString());
-					}
-				}
-
-				function prettify() {
-					var t = toTextareaEl.val();
-
-					try {
-						toTextareaEl.val(JSON.stringify(JSON.parse(t), null, "  "));
-						toTextareaEl.removeClass('error');
-						errorsEl.html('');
-					} catch (e) {
-						console.error(e);
-						toTextareaEl.addClass('error');
-						errorsEl.html(e.toString());
+					if (prettifyEl.is(":checked")) {
+						toTextareaEl.val(v ? JSON.stringify(v, null, "  ") : t);
+					} else {
+						toTextareaEl.val(t);
 					}
 				}
 
@@ -143,8 +132,7 @@
 				transform();
 
 				// onclick
-				$('#transform-button').click(transform);
-				$('#prettify-button').click(prettify);
+				cm.on("change", transform);
 
 				// scroll
 				fromTextareaEl.scroll(function () {
@@ -175,9 +163,8 @@
 			<h2>Example</h2>
 
 			<div class="transform">
-				<div id="errors"></div>
 				<div class="textarea-container">
-					<textarea id="from-textarea">/* This is test input
+					<textarea id="from-textarea">/* This is a test input
  * Comments are omitted
  */
 {
@@ -206,9 +193,9 @@
 					<textarea id="to-textarea"></textarea>
 				</div>
 
+				<div id="errors"></div>
 				<div class="buttons">
-					<button id="transform-button">Transform</button>
-					<button id="prettify-button">Prettify</button>
+					<label><input type="checkbox" id="prettify-checkbox" />Prettify</label>
 				</div>
 			</div>
 
