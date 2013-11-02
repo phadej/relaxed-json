@@ -125,15 +125,22 @@
 			<h1>Relaxed JSON</h1>
 		</header>
 		<article>
-			<p>Are you frustrated that you cannot add comments into your example JSON structure or easily strip them? Relaxed JSON is a simple solution. Small JavaScript library with only one exposed function <code>RJSON.transform <i>/* string &rarr; string */</i></code>.</p>
-			<p>Relaxed JSON (modified BSD license) is a strict superset of JSON. Valid JSON will not be changed by <code>RJSON.transform</code>. But in addition there are few extensions helping writing JSON by hand.</p>
+			<p>Are you frustrated that you cannot add comments into your configuration JSON
+			Relaxed JSON is a simple solution.
+			Small JavaScript library with only one exposed function <code>RJSON.transform(text : string) : string</code>
+			(and few convenient helpers).</p>
+			<p><a href="http://oleg.fi/relaxed-json">Relaxed JSON</a> (modified BSD license) is a strict superset of JSON,
+			relaxing strictness of valilla JSON.
+			Valid, vanilla JSON will not be changed by <code>RJSON.transform</code>. But there are few additional
+			features helping writing JSON by hand.</p>
 			<ul>
-				<li>Comments are stripped : <code>// foo</code> and <code>/* bar */</code> &rarr; <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>. Comments are converted into whitespace, so your formatting is preserved.</li>
-				<li>Trailing comma is allowed : <code> [1, 2, 3, ]</code> &rarr; <code> [1, 2, 3]</code>. Works also in objects <code>{ "foo": "bar", }</code> &rarr; <code>{ "foo": "bar" }</code>.</li>
-				<li>Identifiers are transformed into strings : <code>{ foo: bar }</code> &rarr; <code>{ "foo": "bar" }</code>.
-				<li>Single quoted strings are allowed : <code>'say "Hello"'</code> &rarr; <code>"say \"Hello\""</code>.
+			<li>Comments are stripped : <code>// foo</code> and <code>/* bar */</code>  → <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>.
+			Comments are converted into whitespace, so your formatting is preserved.</li>
+			<li>Trailing comma is allowed : <code>[1, 2, 3, ]</code> → <code>[1, 2, 3]</code>. Works also in objects <code>{ &quot;foo&quot;: &quot;bar&quot;, }</code> → <code>{ &quot;foo&quot;: &quot;bar&quot; }</code>.</li>
+			<li>Identifiers are transformed into strings : <code>{ foo: bar }</code> → <code>{ &quot;foo&quot;: &quot;bar&quot; }</code>.</li>
+			<li>Single quoted strings are allowed : <code>&#39;say &quot;Hello&quot;&#39;</code> → <code>&quot;say \&quot;Hello\&quot;&quot;</code>.</li>
+			<li>More different characters is supported in identifiers: <code>foo-bar</code> → <code>&quot;foo-bar&quot;</code>.</li>
 			</ul>
-			<p>For the source code, see the <a href="https://github.com/phadej/ejson">GitHub repository</a>.
 
 			<h2>Example</h2>
 
@@ -178,6 +185,6 @@
 			<p><em>Relaxed JSON</em>, by <a href="http://oleg.fi/" title="Oleg Grenrus">Oleg Grenrus</a></p>
 		</article>
 
-		<a href="https://github.com/phadej/ejson"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+		<a href="https://github.com/phadej/relaxed-json"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 	</body>
 </html>
