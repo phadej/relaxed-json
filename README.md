@@ -1,3 +1,5 @@
+# Relaxed JSON
+
 Are you frustrated that you cannot add comments into your example JSON
 structure or easily strip them? Relaxed JSON is a simple solution. Small
 JavaScript library with only one exposed function `EJSON.transform /* string → string */`.
@@ -10,3 +12,4 @@ extensions helping writing JSON by hand.
 * Trailing comma is allowed : `[1, 2, 3, ]` → `[1, 2, 3]`. Works also in objects `{ "foo": "bar", }` → `{ "foo": "bar" }`.
 * Identifiers are transformed into strings : `{ foo: bar }` → `{ "foo": "bar" }`.
 * Single quoted strings are allowed : `'say "Hello"'` → `"say \"Hello\""`.
+
