@@ -32,11 +32,7 @@
   // ES5:  !! ( f(x) || f(y) || f(z) || false)
   // this:    ( f(x) || f(y) || f(z) || false)
   function some(array, f) {
-    if (array.length === 0) {
-      return false;
-    }
-
-    var acc;
+    var acc = false;
     for (var i = 0; i < array.length; i++) {
       acc = f(array[i], i, array);
       if (acc) {
@@ -96,7 +92,7 @@
 
     function fStringSingle(m) {
       // String in single quotes
-      var content = m[1].replace(/([^'\\]|\\['bnrt\\]|\\u[0-9a-fA-F]{4})/g, function (m) {
+      var content = m[1].replace(/([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})/g, function (m) {
         if (m === "\"") {
           return "\\\"";
         } else if (m === "\\'") {
@@ -156,9 +152,9 @@
       { re: /^:/, f: f(":") },
       { re: /^(true|false|null)/, f: f("keyword") },
       { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: fNumber },
-      { re: /^"([^"\\]|\\["bnrt\\]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
+      { re: /^"([^"\\]|\\["bnrtf\\]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
       // additional stuff
-      { re: /^'(([^'\\]|\\['bnrt\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
+      { re: /^'(([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
       { re: /^\/\/.*?\n/, f: fComment },
       { re: /^\/\*[\s\S]*?\*\//, f: fComment },
       { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
@@ -305,7 +301,7 @@
       tokens.unshift(token);
       value = parseAny(tokens, reviver);
 
-      arr[key] = reviver ? reviver(key, value) : value;
+      arr[key] = reviver ? reviver("" + key, value) : value;
       break;
     }
 
@@ -320,7 +316,7 @@
         case ",":
           key += 1;
           value = parseAny(tokens, reviver);
-          arr[key] = reviver ? reviver(key, value) : value;
+          arr[key] = reviver ? reviver("" + key, value) : value;
           break;
 
         default:
@@ -339,11 +335,9 @@
     switch (token.type) {
     case "{":
       ret = parseObject(tokens, reviver);
-      ret = reviver ? reviver("", ret) : ret;
       break;
     case "[":
       ret = parseArray(tokens, reviver);
-      ret = reviver ? reviver("", ret) : ret;
       break;
     case "string":
     case "number":
@@ -360,6 +354,10 @@
       err = new SyntaxError("Unexpected token: " + token.type);
       err.line = token.line;
       throw err;
+    }
+
+    if (end) {
+      ret = reviver ? reviver("", ret) : ret;
     }
 
     if (end && tokens.length !== 0) {

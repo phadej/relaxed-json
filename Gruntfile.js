@@ -15,6 +15,9 @@ module.exports = function(grunt) {
       src: {
         src: "relaxed-json.js"
       },
+      test: {
+        src: "test/**/*.js"
+      },
       webcli: {
         src: "web.js",
         options: {
@@ -22,6 +25,15 @@ module.exports = function(grunt) {
           node: false,
         },
       },
+    },
+    simplemocha: {
+      options: {
+        timeout: 3000,
+        ui: "bdd",
+        reporter: "spec"
+      },
+
+      all: { src: "test/**/*.js" }
     },
     uglify: {
       core: {
@@ -65,14 +77,15 @@ module.exports = function(grunt) {
           sourceMapFilename: "web.min.css.map",
         }
       },
-    }
+    },
   });
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-contrib-less");
+  grunt.loadNpmTasks("grunt-simple-mocha");
 
   // Default task.
-  grunt.registerTask("default", ["jshint"]);
+  grunt.registerTask("default", ["jshint", "simplemocha"]);
 };
