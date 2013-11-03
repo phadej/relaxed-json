@@ -5,6 +5,7 @@ $(function () {
 	var fromTextareaEl = $("#area-from textarea");
 	var toTextareaEl = $("#area-to textarea");
 	var prettifyEl = $("#prettify-checkbox:checkbox");
+	var relaxedEl = $("#relaxed-checkbox:checkbox");
 	var errorsEl = $("#errors");
 
 	var errorLineH;
@@ -32,7 +33,11 @@ $(function () {
 			errorsEl.html("");
 			var i = cmFrom.getValue();
 			t = RJSON.transform(i);
-			v = RJSON.parse2(i);
+			if (relaxedEl.is(":checked")) {
+				v = RJSON.parse2(i);
+			} else {
+				v = RJSON.parse3(i);
+			}
 			fromCmEl.removeClass("error");
 			clearErrorLine();
 		} catch (e) {
@@ -60,5 +65,6 @@ $(function () {
 
 	// onclick
 	prettifyEl.on("change", transform);
+	relaxedEl.on("change", transform);
 	cmFrom.on("change", transform);
 });

@@ -83,7 +83,7 @@
     };
   }
 
-  var tokenSpecs = (function (){
+  function tokenSpecs(relaxed) {
     function f(type) {
       return function(m) {
         return { type: type, match: m[0] };
@@ -142,7 +142,7 @@
       };
     }
 
-    return [
+    var ret = [
       { re: /^\s+/, f: f(" ") },
       { re: /^\{/, f: f("{") },
       { re: /^\}/, f: f("}") },
@@ -153,15 +153,23 @@
       { re: /^(true|false|null)/, f: f("keyword") },
       { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: fNumber },
       { re: /^"([^"\\]|\\["bnrtf\\]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
-      // additional stuff
-      { re: /^'(([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
-      { re: /^\/\/.*?\n/, f: fComment },
-      { re: /^\/\*[\s\S]*?\*\//, f: fComment },
-      { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
     ];
-  }());
 
-  var lexer = makeLexer(tokenSpecs);
+    // additional stuff
+    if (relaxed) {
+      ret = ret.concat([
+        { re: /^'(([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
+        { re: /^\/\/.*?\n/, f: fComment },
+        { re: /^\/\*[\s\S]*?\*\//, f: fComment },
+        { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
+      ]);
+    }
+
+    return ret;
+  }
+
+  var lexer = makeLexer(tokenSpecs(true));
+  var strictLexer = makeLexer(tokenSpecs(false));
 
   function transformTokens(tokens) {
     return tokens.reduce(function (tokens, token) {
@@ -376,6 +384,20 @@
     // remove trailing commas
     tokens = transformTokens(tokens);
 
+    // Strip whitespace
+    tokens = tokens.filter(function (token) {
+      return token.type !== " ";
+    });
+
+    // concat stuff
+    return parseAny(tokens, reviver, true);
+  }
+
+  function parse3(text, reviver) {
+    // Tokenize contents
+    var tokens = strictLexer(text);
+
+    // Strip whitespace
     tokens = tokens.filter(function (token) {
       return token.type !== " ";
     });
@@ -389,6 +411,7 @@
     transform: transform,
     parse: parse,
     parse2: parse2,
+    parse3: parse3,
   };
 
   /* global window, exports */

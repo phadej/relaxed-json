@@ -42,28 +42,38 @@ describe("transform()", function () {
     jsc.assert(property, jscOpts);
   });
 
+  function relaxation(input, expected) {
+    assert.deepEqual(rjson.parse(input), expected);
+    assert.throws(function () {
+      JSON.parse(input);
+    });
+    assert.throws(function () {
+      rjson.parse3(input);
+    });
+  }
+
   describe("relaxations", function () {
     it("handles trailing comma", function () {
-      assert.deepEqual(rjson.parse("[1, 2, 3, ]"), [1, 2, 3]);
+      relaxation("[1, 2, 3, ]", [1, 2, 3]);
     });
 
     it("transforms identifiers into strings", function () {
-      assert.deepEqual(rjson.parse("foo-bar"), "foo-bar");
-      assert.deepEqual(rjson.parse("foo\\bar"), "foo\\bar");
+      relaxation("foo-bar", "foo-bar");
+      relaxation("foo\\bar", "foo\\bar");
     });
 
     it("handles single quoted strings", function () {
-      assert.deepEqual(rjson.parse("'foo-bar'"), "foo-bar");
-      assert.deepEqual(rjson.parse("'foo\"bar'"), "foo\"bar");
-      assert.deepEqual(rjson.parse("'foo\\'bar'"), "foo'bar");
+      relaxation("'foo-bar'", "foo-bar");
+      relaxation("'foo\"bar'", "foo\"bar");
+      relaxation("'foo\\'bar'", "foo'bar");
     });
 
     it("strips line comments", function () {
-      assert.deepEqual(rjson.parse("[ true,  // comment\n false]"), [true, false]);
+      relaxation("[ true,  // comment\n false]", [true, false]);
     });
 
     it("strips multi-line comments", function () {
-      assert.deepEqual(rjson.parse("[ true,  /* comment \n  */ false]"), [true, false]);
+      relaxation("[ true,  /* comment \n  */ false]", [true, false]);
     });
   });
 
@@ -193,8 +203,16 @@ describe("parse2()", function () {
     });
   }
 
+  describe("error cases - rjson.parse", function () {
+    errorCases(rjson.parse);
+  });
+
   describe("error cases - rjson.parse2", function () {
     errorCases(rjson.parse2);
+  });
+
+  describe("error cases - rjson.parse3", function () {
+    errorCases(rjson.parse3);
   });
 
   describe("error cases - JSON.parse, verify", function () {

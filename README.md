@@ -25,3 +25,5 @@ features helping writing JSON by hand.
   Parse the RJSON text, virtually `JSON.parse(JSON.transform(text), reviver)`.
 - `RJSON.parse2(text : string, reviver : function) : obj`.
   This is self-made parser function, which should act as `RJSON.parse`, but provides better error messages.
+- `RJSON.parse3(text : string, reviver : function) : obj`.
+  This is drop-in replacement for `JSON.parse` with better error messages.
