@@ -224,11 +224,64 @@
     return token;
   }
 
+  function skipColon(tokens, state) {
+    var colon = popToken(tokens, state);
+    if (colon.type !== ":") {
+      var message = "Unexpected token: " + colon.type + ", expected ':'";
+      if (state.tolerant) {
+        state.warnings.push({
+          message: message,
+          line: colon.line,
+        });
+
+        state.pos -= 1;
+      } else {
+        err = new SyntaxError(message);
+        err.line = token.line;
+        throw err;
+      }
+    }
+  }
+
   function parseObject(tokens, state) {
     var token = popToken(tokens, state);
     var obj = {};
-    var key, colon, value;
+    var key, value;
     var err;
+    var message;
+
+    if (token.type !== "}" && token.type !== "string") {
+      message = "Unexpected token: '" + token.type + "', expected '}' or 'string'";
+
+      if (state.tolerant) {
+        state.warnings.push({
+          message: message,
+          line: token.line,
+        });
+
+        if (token.type !== "eof" && token.type !== "number") {
+          state.pos -= 1;
+        }
+
+        if (token.type === "number") {
+          token = {
+            type: "string",
+            value: ""+token.value,
+            line: token.line,
+          };
+        } else {
+          token = {
+            type: "}",
+            line: token.line,
+          };
+        }
+
+      } else {
+        err = new SyntaxError(message);
+        err.line = token.line;
+        throw err;
+      }
+    }
 
     switch (token.type) {
     case "}":
@@ -236,12 +289,7 @@
 
     case "string":
       key = token.value;
-      colon = popToken(tokens, state);
-      if (colon.type !== ":") {
-        err = new SyntaxError("Unexpected token: " + colon.type + ", expected colon");
-        err.line = token.line;
-        throw err;
-      }
+      skipColon(tokens, state);
       value = parseAny(tokens, state);
 
       value = state.reviver ? state.reviver(key, value) : value;
@@ -249,16 +297,33 @@
         obj[key] = value;
       }
       break;
-
-    default:
-      err = new SyntaxError("Unexpected token: " + token.type + ", expected string or }");
-      err.line = token.line;
-      throw err;
     }
 
     // Rest
     while (true) {
       token = popToken(tokens, state);
+
+      if (token.type !== "}" && token.type !== ",") {
+        message = "Unexpected token: '" + token.type + "', expected ',' or ']'";
+        var newtype = token.type === "eof" ? "}" : ",";
+        if (state.tolerant) {
+          state.warnings.push({
+            message: message + "; assuming '" + newtype + "'",
+            line: token.line,
+          });
+
+          token = {
+            type: newtype,
+            line: token.line,
+          };
+
+          state.pos -= 1;
+        } else {
+          err = new SyntaxError(message);
+          err.line = token.line;
+          throw err;
+        }
+      }
 
       switch (token.type) {
       case "}":
@@ -267,17 +332,36 @@
       case ",":
         token = popToken(tokens, state);
         if (token.type !== "string") {
-          err = new SyntaxError("Unexpected token: " + token.type + ", expected string");
-          err.line = token.line;
-          throw err;
+          message = "Unexpected token: '" + token.type + "', expected 'string'";
+          if (state.tolerant) {
+            state.warnings.push({
+              message: message,
+              line: token.line,
+            });
+
+            if (token.type === "number") {
+              token = {
+                type: "string",
+                value: "" + token.value,
+                line: token.line,
+              };
+            } else {
+              token = {
+                type: "string",
+                value: "null",
+                line: token.line,
+              };
+
+              state.pos -= 1;
+            }
+          } else {
+            err = new SyntaxError(message);
+            err.line = token.line;
+            throw err;
+          }
         }
         key = token.value;
-        colon = popToken(tokens, state);
-        if (colon.type !== ":") {
-          err = new SyntaxError("Unexpected token: " + colon.type + ", expected colon");
-          err.line = token.line;
-          throw err;
-        }
+        skipColon(tokens, state);
         value = parseAny(tokens, state);
 
         value = state.reviver ? state.reviver(key, value) : value;
@@ -285,11 +369,6 @@
           obj[key] = value;
         }
         break;
-
-        default:
-          err = new SyntaxError("Unexpected token: " + token.type + ", expected , or }");
-          err.line = token.line;
-          throw err;
       }
     }
   }
@@ -303,7 +382,7 @@
 
     if (state.tolerant && token.type === "eof") {
       state.warnings.push({
-        message: "Expected ']', got end-of-file",
+        message: "Unexpected token: '" + token.type + "', expected ']' or json object",
         line: token.line,
       });
       token.type = "]";
@@ -327,7 +406,7 @@
 
 
       if (token.type !== "]" && token.type !== ",") {
-        message = "Unexpected token: '" + token.type + "', expected , or ]";
+        message = "Unexpected token: '" + token.type + "', expected ',' or ']'";
         var newtype = token.type === "eof" ? "]" : ",";
         if (state.tolerant) {
           state.warnings.push({
