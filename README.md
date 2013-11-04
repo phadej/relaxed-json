@@ -1,5 +1,8 @@
 # Relaxed JSON
 
+[![Build Status](https://secure.travis-ci.org/phadej/jsverify.png?branch=master)](http://travis-ci.org/phadej/jsverify)
+[![NPM version](https://badge.fury.io/js/relaxed-json.png)](http://badge.fury.io/js/relaxed-json)
+
 Are you frustrated that you cannot add comments into your configuration JSON
 Relaxed JSON is a simple solution.
 Small JavaScript library with only one exposed function `RJSON.transform(text : string) : string`
