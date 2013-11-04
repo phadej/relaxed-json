@@ -142,6 +142,20 @@
       };
     }
 
+    function fKeyword(m) {
+      var value;
+      switch (m[1]) {
+      case "null": value = null; break;
+      case "true": value = true; break;
+      case "false": value = false; break;
+      }
+      return {
+        type: "keyword",
+        match: m[0],
+        value: value,
+      };
+    }
+
     var ret = [
       { re: /^\s+/, f: f(" ") },
       { re: /^\{/, f: f("{") },
@@ -150,7 +164,7 @@
       { re: /^\]/, f: f("]") },
       { re: /^,/, f: f(",") },
       { re: /^:/, f: f(":") },
-      { re: /^(true|false|null)/, f: f("keyword") },
+      { re: /^(true|false|null)/, f: fKeyword },
       { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: fNumber },
       { re: /^"([^"\\]|\\["bnrtf\\]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
     ];
@@ -236,8 +250,8 @@
 
         state.pos -= 1;
       } else {
-        err = new SyntaxError(message);
-        err.line = token.line;
+        var err = new SyntaxError(message);
+        err.line = colon.line;
         throw err;
       }
     }
@@ -259,19 +273,25 @@
           line: token.line,
         });
 
-        if (token.type !== "eof" && token.type !== "number") {
+        if (token.type !== "eof" && token.type !== "number" && token.type !== "keyword") {
           state.pos -= 1;
         }
 
-        if (token.type === "number") {
+        if (token.type === "number" || token.type === "keyword") {
           token = {
             type: "string",
             value: ""+token.value,
             line: token.line,
           };
-        } else {
+        } else if (token.type === "eof") {
           token = {
             type: "}",
+            line: token.line,
+          };
+        } else {
+          token = {
+            type: "string",
+            value: "null",
             line: token.line,
           };
         }
@@ -339,7 +359,7 @@
               line: token.line,
             });
 
-            if (token.type === "number") {
+            if (token.type === "number" || token.type === "keyword") {
               token = {
                 type: "string",
                 value: "" + token.value,
@@ -455,14 +475,8 @@
       break;
     case "string":
     case "number":
-      ret = token.value;
-      break;
     case "keyword":
-      switch (token.match) {
-        case "null": ret = null; break;
-        case "true": ret = true; break;
-        case "false": ret = false; break;
-      }
+      ret = token.value;
       break;
     default:
       message = "Unexpected token: '" + token.type + "', expected '[', '{', number, string or atom";
