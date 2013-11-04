@@ -1,4 +1,4 @@
-/* global $, CodeMirror, RJSON, -console */
+/* global $, CodeMirror, RJSON */
 $(function () {
 	"use strict";
 
@@ -41,20 +41,28 @@ $(function () {
 			});
 			fromCmEl.removeClass("error");
 			clearErrorLine();
-		} catch (e) {
+		} catch (ex) {
 			fromCmEl.addClass("error");
-			if (e && e.line) {
+			if (ex && ex.line) {
 				clearErrorLine();
-				errorLineH = cmFrom.getLineHandle(e.line - 1);
+				errorLineH = cmFrom.getLineHandle(ex.line - 1);
 				if (errorLineH) {
 					cmFrom.addLineClass(errorLineH, "background", "error-line");
 				}
 			}
-			errorsEl.html(e.toString());
+
+			errorsEl.html(ex.toString());
+			if (ex && ex.warnings && ex.warnings.length > 1) {
+				var ul = $("<ul>");
+				ex.warnings.forEach(function (w) {
+					ul.append($("<li>").html(w.line + ": " + w.message));
+				});
+				errorsEl.append(ul);
+			}
 
 			// when tolerant, we still get something
-			if (e.obj) {
-				v = e.obj;
+			if (ex && ex.obj) {
+				v = ex.obj;
 				t = JSON.stringify(v, null, 2);
 			} else {
 				return;

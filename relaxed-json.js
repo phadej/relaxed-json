@@ -217,9 +217,10 @@
     state.pos += 1;
 
     if (!token) {
-       var err = new SyntaxError("Unexpected end-of-file");
-      throw err;
+      var line = tokens.length !== 0 ? tokens[tokens.length - 1].line : 1;
+      return { type: "eof", line: line };
     }
+
     return token;
   }
 
@@ -299,12 +300,20 @@
     var key = 0, value;
     var err;
 
+    if (state.tolerant && token.type === "eof") {
+      state.warnings.push({
+        message: "Expected ']', got end-of-file",
+        line: token.line,
+      });
+      token.type = "]";
+    }
+
     switch (token.type) {
     case "]":
       return [];
 
     default:
-      tokens.unshift(token);
+      state.pos -= 1; // push the token back
       value = parseAny(tokens, state);
 
       arr[key] = state.reviver ? state.reviver("" + key, value) : value;
@@ -314,6 +323,14 @@
     // Rest
     while (true) {
       token = popToken(tokens, state);
+
+      if (state.tolerant && token.type === "eof") {
+        state.warnings.push({
+          message: "Expected ']' or ',', got end-of-file",
+          line: token.line,
+        });
+        token.type = "]";
+      }
 
       switch (token.type) {
         case "]":
@@ -370,7 +387,10 @@
     if (end && state.pos < tokens.length) {
       message = "Unexpected token: " + tokens[state.pos].type + ", expected end-of-input";
       if (state.tolerant) {
-        state.warnings.push({ line: tokens[state.pos].line, message: message });
+        state.warnings.push({
+          message: message,
+          line: tokens[state.pos].line,
+        });
       } else {
         err = new SyntaxError(message);
         err.line = tokens[state.pos].line;
