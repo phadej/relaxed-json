@@ -150,7 +150,7 @@
       case "false": value = false; break;
       }
       return {
-        type: "keyword",
+        type: "atom",
         match: m[0],
         value: value,
       };
@@ -273,11 +273,11 @@
           line: token.line,
         });
 
-        if (token.type !== "eof" && token.type !== "number" && token.type !== "keyword") {
+        if (token.type !== "eof" && token.type !== "number" && token.type !== "atom") {
           state.pos -= 1;
         }
 
-        if (token.type === "number" || token.type === "keyword") {
+        if (token.type === "number" || token.type === "atom") {
           token = {
             type: "string",
             value: ""+token.value,
@@ -359,7 +359,7 @@
               line: token.line,
             });
 
-            if (token.type === "number" || token.type === "keyword") {
+            if (token.type === "number" || token.type === "atom") {
               token = {
                 type: "string",
                 value: "" + token.value,
@@ -475,7 +475,7 @@
       break;
     case "string":
     case "number":
-    case "keyword":
+    case "atom":
       ret = token.value;
       break;
     default:
