@@ -299,6 +299,7 @@
     var arr = [];
     var key = 0, value;
     var err;
+    var message;
 
     if (state.tolerant && token.type === "eof") {
       state.warnings.push({
@@ -324,12 +325,27 @@
     while (true) {
       token = popToken(tokens, state);
 
-      if (state.tolerant && token.type === "eof") {
-        state.warnings.push({
-          message: "Expected ']' or ',', got end-of-file",
-          line: token.line,
-        });
-        token.type = "]";
+
+      if (token.type !== "]" && token.type !== ",") {
+        message = "Unexpected token: '" + token.type + "', expected , or ]";
+        var newtype = token.type === "eof" ? "]" : ",";
+        if (state.tolerant) {
+          state.warnings.push({
+            message: message + "; assuming '" + newtype + "'",
+            line: token.line,
+          });
+
+          token = {
+            type: newtype,
+            line: token.line,
+          };
+
+          state.pos -= 1;
+        } else {
+          err = new SyntaxError(message);
+          err.line = token.line;
+          throw err;
+        }
       }
 
       switch (token.type) {
@@ -341,11 +357,6 @@
           value = parseAny(tokens, state);
           arr[key] = state.reviver ? state.reviver("" + key, value) : value;
           break;
-
-        default:
-          err = new SyntaxError("Unexpected token: " + token.type + ", expected , or }");
-          err.line = token.line;
-          throw err;
       }
     }
   }
@@ -375,9 +386,18 @@
       }
       break;
     default:
-      err = new SyntaxError("Unexpected token: " + token.type);
-      err.line = token.line;
-      throw err;
+      message = "Unexpected token: '" + token.type + "', expected '[', '{', number, string or atom";
+      if (state.tolerant) {
+        state.warnings.push({
+          message: message + "; assuming null",
+          line: token.line,
+        });
+        ret = null;
+      } else {
+        err = new SyntaxError();
+        err.line = token.line;
+        throw err;
+      }
     }
 
     if (end) {
