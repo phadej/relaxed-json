@@ -33,11 +33,10 @@ $(function () {
 			errorsEl.html("");
 			var i = cmFrom.getValue();
 			t = RJSON.transform(i);
-			if (relaxedEl.is(":checked")) {
-				v = RJSON.parse2(i);
-			} else {
-				v = RJSON.parse3(i);
-			}
+			v = RJSON.parse(i, {
+				relaxed: relaxedEl.is(":checked"),
+				warnings: true,
+			});
 			fromCmEl.removeClass("error");
 			clearErrorLine();
 		} catch (e) {

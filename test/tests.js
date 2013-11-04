@@ -97,11 +97,11 @@ describe("parse()", function () {
   });
 });
 
-describe("parse2()", function () {
+describe("parse() with opts { warnings: true } ", function () {
   it("should parse everything JSON.parse does", function () {
     var property = jsc.forall(jsc.value(), function (x) {
       var t = JSON.stringify(x, null, 2);
-      return _.isEqual(rjson.parse2(t), JSON.parse(t));
+      return _.isEqual(rjson.parse(t, { warnings: true }), JSON.parse(t));
     });
 
     jsc.assert(property, jscOpts);
@@ -123,7 +123,7 @@ describe("parse2()", function () {
         return v;
       }
 
-      var rjsonParsed = rjson.parse2(t, rjsonReviver);
+      var rjsonParsed = rjson.parse(t, { warnings: true, reviver: rjsonReviver });
       var jsonParsed = JSON.parse(t, jsonReviver);
 
       return _.isEqual(rjsonParsed, jsonParsed) && _.isEqual(rjsonCalls, jsonCalls);
@@ -133,9 +133,9 @@ describe("parse2()", function () {
   });
 
   it("parses atoms", function () {
-    assert.deepEqual(rjson.parse2("null"), null);
-    assert.deepEqual(rjson.parse2("true"), true);
-    assert.deepEqual(rjson.parse2("false"), false);
+    assert.deepEqual(rjson.parse("null", { warnings: true }), null);
+    assert.deepEqual(rjson.parse("true", { warnings: true }), true);
+    assert.deepEqual(rjson.parse("false", { warnings: true }), false);
   });
 
   it("removes values from objects, if reviver returns undefined", function () {
@@ -145,7 +145,7 @@ describe("parse2()", function () {
       return v % 2 === 0 ? v : undefined;
     }
     assert.deepEqual(JSON.parse(input, reviver), { bar : 2});
-    assert.deepEqual(rjson.parse2(input, reviver), { bar : 2});
+    assert.deepEqual(rjson.parse(input, { warnings: true , reviver: reviver }), { bar : 2});
   });
 
   function errorCases(parse) {
@@ -204,15 +204,37 @@ describe("parse2()", function () {
   }
 
   describe("error cases - rjson.parse", function () {
+    it("throws if secodn parameter is not an object or a function", function () {
+      assert.throws(function () {
+        rjson.parse("[1, 2]", true);
+      });
+    });
+
     errorCases(rjson.parse);
   });
 
-  describe("error cases - rjson.parse2", function () {
-    errorCases(rjson.parse2);
+  describe("error cases - rjson.parse {}", function () {
+    errorCases(function (text) {
+      return rjson.parse(text, {});
+    });
   });
 
-  describe("error cases - rjson.parse3", function () {
-    errorCases(rjson.parse3);
+  describe("error cases - rjson.parse { relaxed: false }", function () {
+    errorCases(function (text) {
+      return rjson.parse(text, { relaxed: false });
+    });
+  });
+
+  describe("error cases - rjson.parse { warnings: true }", function () {
+    errorCases(function (text) {
+      return rjson.parse(text, { warnings: true });
+    });
+  });
+
+  describe("error cases - rjson.parse { relaxed: false, warnings: true }", function () {
+    errorCases(function (text) {
+      return rjson.parse(text, { relaxed: false, warnings: true });
+    });
   });
 
   describe("error cases - JSON.parse, verify", function () {

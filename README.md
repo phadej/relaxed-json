@@ -21,9 +21,9 @@ features helping writing JSON by hand.
 
 - `RJSON.transform(text : string) : string`.
   Transforms Relaxed JSON text into JSON text. Doesn't verify (parse) the JSON, i.e result JSON might be invalid as well
-- `RJSON.parse(text : string, reviver : function) : obj`.
+- `RJSON.parse(text : string, reviver : function | opts : obj) : obj`.
   Parse the RJSON text, virtually `JSON.parse(JSON.transform(text), reviver)`.
-- `RJSON.parse2(text : string, reviver : function) : obj`.
-  This is self-made parser function, which should act as `RJSON.parse`, but provides better error messages.
-- `RJSON.parse3(text : string, reviver : function) : obj`.
-  This is drop-in replacement for `JSON.parse` with better error messages.
+  You could pass a reviver function or an options object as the second argument. Supported options:
+  - `reviver`: you could still pass a reviver
+  - `relaxed`: use relaxed version of JSON (default: true)
+  - `warnings`: use relaxed JSON own parser, supports better error messages (default: false).

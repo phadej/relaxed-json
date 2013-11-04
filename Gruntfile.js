@@ -7,16 +7,19 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON("package.json"),
     jshint: {
       options: {
-        jshintrc: ".jshintrc"
+        jshintrc: ".jshintrc",
       },
       gruntfile: {
-        src: "Gruntfile.js"
+        src: "Gruntfile.js",
       },
       src: {
-        src: "relaxed-json.js"
+        src: "relaxed-json.js",
+        options: {
+          node: false,
+        },
       },
       test: {
-        src: "test/**/*.js"
+        src: "test/**/*.js",
       },
       webcli: {
         src: "web.js",

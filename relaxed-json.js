@@ -212,10 +212,6 @@
     }, "");
   }
 
-  function parse(text, reviver) {
-    return JSON.parse(transform(text), reviver);
-  }
-
   function popToken(tokens) {
     var token = tokens.shift();
     if (!token) {
@@ -377,52 +373,53 @@
     return ret;
   }
 
-  function parse2(text, reviver) {
-    // Tokenize contents
-    var tokens = lexer(text);
+  function parse(text, opts) {
+    if (typeof opts === "function" || opts === undefined) {
+      return JSON.parse(transform(text), opts);
+    } else if (new Object(opts) !== opts) {
+      throw new TypeError("opts/reviver should be undefined, a function or an object");
+    }
 
-    // remove trailing commas
-    tokens = transformTokens(tokens);
+    opts.relaxed = opts.relaxed !== undefined ? opts.relaxed : true;
+    opts.warnings = opts.warnings !== undefined ? opts.warnings : false;
 
-    // Strip whitespace
-    tokens = tokens.filter(function (token) {
-      return token.type !== " ";
-    });
+    if (!opts.warnings && !opts.relaxed) {
+      return JSON.parse(text, opts.reviver);
+    }
 
-    // concat stuff
-    return parseAny(tokens, reviver, true);
-  }
+    var tokens = opts.relaxed ? lexer(text) : strictLexer(text);
 
-  function parse3(text, reviver) {
-    // Tokenize contents
-    var tokens = strictLexer(text);
+    if (opts.relaxed) {
+      // Strip commas
+      tokens = transformTokens(tokens);
+    }
 
-    // Strip whitespace
-    tokens = tokens.filter(function (token) {
-      return token.type !== " ";
-    });
+    if (opts.warnings) {
+      // Strip whitespace
+      tokens = tokens.filter(function (token) {
+        return token.type !== " ";
+      });
 
-    // concat stuff
-    return parseAny(tokens, reviver, true);
+      return parseAny(tokens, opts.reviver, true);
+    } else {
+      var newtext = tokens.reduce(function (str, token) {
+        return str + token.match;
+      }, "");
+
+      return JSON.parse(newtext, opts.reviver);
+    }
   }
 
   // Export  stuff
-  var module = {
+  var RJSON = {
     transform: transform,
     parse: parse,
-    parse2: parse2,
-    parse3: parse3,
   };
 
-  /* global window, exports */
+  /* global window, module */
   if (typeof window !== "undefined") {
-    window.RJSON = module;
-  } else if (typeof exports !== "undefined") {
-    for (var k in module) {
-      // Check to make jshint happy
-      if (Object.prototype.hasOwnProperty.call(module, k)) {
-        exports[k] = module[k];
-      }
-    }
+    window.RJSON = RJSON;
+  } else if (typeof module !== "undefined") {
+    module.exports = RJSON;
   }
 }());
