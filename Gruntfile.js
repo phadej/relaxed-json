@@ -48,7 +48,6 @@ module.exports = function(grunt) {
         },
       },
       web: {
-        banner: "/* <%= pkg.name %> - <%= pkg.version %> */",
         src: [
           "components/codemirror.js",
           "components/cm-mode-javascript.js",
