@@ -227,7 +227,7 @@
   function skipColon(tokens, state) {
     var colon = popToken(tokens, state);
     if (colon.type !== ":") {
-      var message = "Unexpected token: " + colon.type + ", expected ':'";
+      var message = "Unexpected token: '" + colon.type + "', expected ':'";
       if (state.tolerant) {
         state.warnings.push({
           message: message,
@@ -484,7 +484,7 @@
     }
 
     if (end && state.pos < tokens.length) {
-      message = "Unexpected token: " + tokens[state.pos].type + ", expected end-of-input";
+      message = "Unexpected token: '" + tokens[state.pos].type + "', expected end-of-input";
       if (state.tolerant) {
         state.warnings.push({
           message: message,
