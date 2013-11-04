@@ -238,10 +238,23 @@
     return token;
   }
 
+  function strToken(token) {
+    switch (token.type) {
+    case "atom":
+    case "string":
+    case "number":
+      return token.type + " " + token.match;
+    case "eof":
+      return "end-of-file";
+    default:
+      return token.type;
+    }
+  }
+
   function skipColon(tokens, state) {
     var colon = popToken(tokens, state);
     if (colon.type !== ":") {
-      var message = "Unexpected token: '" + colon.type + "', expected ':'";
+      var message = "Unexpected token: " + strToken(colon) + ", expected ':'";
       if (state.tolerant) {
         state.warnings.push({
           message: message,
@@ -265,7 +278,7 @@
     var message;
 
     if (token.type !== "}" && token.type !== "string") {
-      message = "Unexpected token: '" + token.type + "', expected '}' or 'string'";
+      message = "Unexpected token: " + strToken(token) + ", expected '}' or string";
 
       if (state.tolerant) {
         state.warnings.push({
@@ -324,7 +337,7 @@
       token = popToken(tokens, state);
 
       if (token.type !== "}" && token.type !== ",") {
-        message = "Unexpected token: '" + token.type + "', expected ',' or ']'";
+        message = "Unexpected token: " + strToken(token) + ", expected ',' or ']'";
         var newtype = token.type === "eof" ? "}" : ",";
         if (state.tolerant) {
           state.warnings.push({
@@ -352,7 +365,7 @@
       case ",":
         token = popToken(tokens, state);
         if (token.type !== "string") {
-          message = "Unexpected token: '" + token.type + "', expected 'string'";
+          message = "Unexpected token: " + strToken(token) + ", expected string";
           if (state.tolerant) {
             state.warnings.push({
               message: message,
@@ -402,7 +415,7 @@
 
     if (state.tolerant && token.type === "eof") {
       state.warnings.push({
-        message: "Unexpected token: '" + token.type + "', expected ']' or json object",
+        message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
         line: token.line,
       });
       token.type = "]";
@@ -426,7 +439,7 @@
 
 
       if (token.type !== "]" && token.type !== ",") {
-        message = "Unexpected token: '" + token.type + "', expected ',' or ']'";
+        message = "Unexpected token: " + strToken(token) + ", expected ',' or ']'";
         var newtype = token.type === "eof" ? "]" : ",";
         if (state.tolerant) {
           state.warnings.push({
@@ -479,7 +492,7 @@
       ret = token.value;
       break;
     default:
-      message = "Unexpected token: '" + token.type + "', expected '[', '{', number, string or atom";
+      message = "Unexpected token: " + strToken(token) + ", expected '[', '{', number, string or atom";
       if (state.tolerant) {
         state.warnings.push({
           message: message + "; assuming null",
@@ -498,7 +511,7 @@
     }
 
     if (end && state.pos < tokens.length) {
-      message = "Unexpected token: '" + tokens[state.pos].type + "', expected end-of-input";
+      message = "Unexpected token: " + strToken(token[state.pos]) + ", expected end-of-input";
       if (state.tolerant) {
         state.warnings.push({
           message: message,
