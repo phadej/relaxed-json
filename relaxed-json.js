@@ -277,7 +277,7 @@
     var err;
     var message;
 
-    if (token.type !== "}" && token.type !== "string") {
+    while (token.type !== "}" && token.type !== "string") {
       message = "Unexpected token: " + strToken(token) + ", expected '}' or string";
 
       if (state.tolerant) {
@@ -285,6 +285,11 @@
           message: message,
           line: token.line,
         });
+
+        if (token.type === ",") {
+          token = popToken(tokens, state);
+          continue;
+        }
 
         if (token.type !== "eof" && token.type !== "number" && token.type !== "atom") {
           state.pos -= 1;
@@ -314,6 +319,8 @@
         err.line = token.line;
         throw err;
       }
+
+      break;
     }
 
     switch (token.type) {
@@ -340,6 +347,7 @@
         message = "Unexpected token: " + strToken(token) + ", expected ',' or ']'";
         var newtype = token.type === "eof" ? "}" : ",";
         if (state.tolerant) {
+
           state.warnings.push({
             message: message + "; assuming '" + newtype + "'",
             line: token.line,
@@ -364,13 +372,22 @@
 
       case ",":
         token = popToken(tokens, state);
-        if (token.type !== "string") {
+        while (token.type !== "string") {
           message = "Unexpected token: " + strToken(token) + ", expected string";
           if (state.tolerant) {
             state.warnings.push({
               message: message,
               line: token.line,
             });
+
+            if (token.type === ",") {
+              token = popToken(tokens, state);
+              continue;
+            }
+
+            if (token.type === "}") {
+              return obj;
+            }
 
             if (token.type === "number" || token.type === "atom") {
               token = {
@@ -392,6 +409,7 @@
             err.line = token.line;
             throw err;
           }
+          break;
         }
 
         key = token.value;
@@ -429,17 +447,36 @@
     var err;
     var message;
 
-    if (state.tolerant && token.type === "eof") {
-      state.warnings.push({
-        message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
-        line: token.line,
-      });
-      token.type = "]";
+    if (state.tolerant) {
+      if (token.type === "eof") {
+        state.warnings.push({
+          message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
+          line: token.line,
+        });
+        token.type = "]";
+      } else if (token.type === ",") {
+        state.warnings.push({
+          message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
+          line: token.line,
+        });
+
+        state.pos -= 1;
+        token = {
+          type: "atom",
+          value: null,
+          line: token.line,
+        };
+      }
     }
 
     switch (token.type) {
     case "]":
       return [];
+
+    case "atom":
+      value = token.value;
+      arr[key] = state.reviver ? state.reviver("" + key, value) : value;
+      break;
 
     default:
       state.pos -= 1; // push the token back
@@ -481,7 +518,15 @@
 
         case ",":
           key += 1;
-          value = parseAny(tokens, state);
+          if (state.tolerant && (tokens[state.pos] && tokens[state.pos].type === ",")) {
+            value = null;
+            state.warnings.push({
+              message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
+              line: token.line,
+            });
+          } else {
+            value = parseAny(tokens, state);
+          }
           arr[key] = state.reviver ? state.reviver("" + key, value) : value;
           break;
       }

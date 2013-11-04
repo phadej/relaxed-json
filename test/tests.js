@@ -186,6 +186,10 @@ describe("parse() with opts { warnings: true } ", function () {
     tolerates("{[", { "null": [] });
     tolerates("{ true 1 {", { "true": 1, "null": {} });
     tolerates("{ 0 0 0 1 }", { "0" : 1, });
+    tolerates("[,,,,", [null, null, null, null, null]);
+    // tolerates("[,,,,]", [null, null, null, null, null]);
+    tolerates("{,0 1,,,}", { "0": 1 });
+    tolerates("{,0 1,,,2 3}", { "0": 1, "2": 3 });
   });
 
   function errorCases(parse) {
