@@ -212,8 +212,10 @@
     }, "");
   }
 
-  function popToken(tokens) {
-    var token = tokens.shift();
+  function popToken(tokens, state) {
+    var token = tokens[state.pos];
+    state.pos += 1;
+
     if (!token) {
        var err = new SyntaxError("Unexpected end-of-file");
       throw err;
@@ -221,8 +223,8 @@
     return token;
   }
 
-  function parseObject(tokens, reviver) {
-    var token = popToken(tokens);
+  function parseObject(tokens, state) {
+    var token = popToken(tokens, state);
     var obj = {};
     var key, colon, value;
     var err;
@@ -233,15 +235,15 @@
 
     case "string":
       key = token.value;
-      colon = popToken(tokens);
+      colon = popToken(tokens, state);
       if (colon.type !== ":") {
         err = new SyntaxError("Unexpected token: " + colon.type + ", expected colon");
         err.line = token.line;
         throw err;
       }
-      value = parseAny(tokens, reviver);
+      value = parseAny(tokens, state);
 
-      value = reviver ? reviver(key, value) : value;
+      value = state.reviver ? state.reviver(key, value) : value;
       if (value !== undefined) {
         obj[key] = value;
       }
@@ -255,29 +257,29 @@
 
     // Rest
     while (true) {
-      token = popToken(tokens);
+      token = popToken(tokens, state);
 
       switch (token.type) {
       case "}":
         return obj;
 
       case ",":
-        token = popToken(tokens);
+        token = popToken(tokens, state);
         if (token.type !== "string") {
           err = new SyntaxError("Unexpected token: " + token.type + ", expected string");
           err.line = token.line;
           throw err;
         }
         key = token.value;
-        colon = popToken(tokens);
+        colon = popToken(tokens, state);
         if (colon.type !== ":") {
           err = new SyntaxError("Unexpected token: " + colon.type + ", expected colon");
           err.line = token.line;
           throw err;
         }
-        value = parseAny(tokens, reviver);
+        value = parseAny(tokens, state);
 
-        value = reviver ? reviver(key, value) : value;
+        value = state.reviver ? state.reviver(key, value) : value;
         if (value !== undefined) {
           obj[key] = value;
         }
@@ -291,8 +293,8 @@
     }
   }
 
-  function parseArray(tokens, reviver) {
-    var token = popToken(tokens);
+  function parseArray(tokens, state) {
+    var token = popToken(tokens, state);
     var arr = [];
     var key = 0, value;
     var err;
@@ -303,15 +305,15 @@
 
     default:
       tokens.unshift(token);
-      value = parseAny(tokens, reviver);
+      value = parseAny(tokens, state);
 
-      arr[key] = reviver ? reviver("" + key, value) : value;
+      arr[key] = state.reviver ? state.reviver("" + key, value) : value;
       break;
     }
 
     // Rest
     while (true) {
-      token = popToken(tokens);
+      token = popToken(tokens, state);
 
       switch (token.type) {
         case "]":
@@ -319,8 +321,8 @@
 
         case ",":
           key += 1;
-          value = parseAny(tokens, reviver);
-          arr[key] = reviver ? reviver("" + key, value) : value;
+          value = parseAny(tokens, state);
+          arr[key] = state.reviver ? state.reviver("" + key, value) : value;
           break;
 
         default:
@@ -331,17 +333,17 @@
     }
   }
 
-  function parseAny(tokens, reviver, end) {
-    var token = popToken(tokens);
+  function parseAny(tokens, state, end) {
+    var token = popToken(tokens, state);
     var ret;
     var err;
 
     switch (token.type) {
     case "{":
-      ret = parseObject(tokens, reviver);
+      ret = parseObject(tokens, state);
       break;
     case "[":
-      ret = parseArray(tokens, reviver);
+      ret = parseArray(tokens, state);
       break;
     case "string":
     case "number":
@@ -361,10 +363,10 @@
     }
 
     if (end) {
-      ret = reviver ? reviver("", ret) : ret;
+      ret = state.reviver ? state.reviver("", ret) : ret;
     }
 
-    if (end && tokens.length !== 0) {
+    if (end && state.pos !== tokens.length) {
       err = new SyntaxError("Unexpected token: " + tokens[0].type + ", expected end-of-input");
       err.line = tokens[0].line;
       throw err;
@@ -400,7 +402,8 @@
         return token.type !== " ";
       });
 
-      return parseAny(tokens, opts.reviver, true);
+      var state = { pos: 0, reviver: opts.reviver };
+      return parseAny(tokens, state, true);
     } else {
       var newtext = tokens.reduce(function (str, token) {
         return str + token.match;
