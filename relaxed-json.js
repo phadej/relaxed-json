@@ -247,7 +247,7 @@
     case "eof":
       return "end-of-file";
     default:
-      return token.type;
+      return "'" + token.type + "'";
     }
   }
 
