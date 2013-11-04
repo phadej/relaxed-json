@@ -55,7 +55,7 @@ $(function () {
 			if (ex && ex.warnings && ex.warnings.length > 1) {
 				var ul = $("<ul>");
 				ex.warnings.forEach(function (w) {
-					ul.append($("<li>").html(w.line + ": " + w.message));
+					ul.append($("<li>").html("Line " + w.line + ": " + w.message));
 				});
 				errorsEl.append(ul);
 			}
