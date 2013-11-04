@@ -148,6 +148,23 @@ describe("parse() with opts { warnings: true } ", function () {
     assert.deepEqual(rjson.parse(input, { warnings: true , reviver: reviver }), { bar : 2});
   });
 
+  describe("duplicate keys", function () {
+    it("by default doesn't warn", function () {
+      assert(rjson.parse("{\"foo\": 0, \"foo\": 1}"), { foo: 1 });
+      assert(JSON.parse("{\"foo\": 0, \"foo\": 1}"), { foo: 1 });
+    });
+
+    it("warns when turned warnings or tolerate is turned on", function () {
+      assert.throws(function () {
+        rjson.parse("{\"foo\": 0, \"foo\": 1}", { duplicate: true, warnings: true });
+      });
+
+      assert.throws(function () {
+        rjson.parse("{\"foo\": 0, \"foo\": 1}", { duplicate: true, tolerant: true });
+      });
+    });
+  });
+
   describe("tolerant parser", function () {
     function tolerates(value, expected) {
       it("tolerates " + value, function () {
@@ -168,6 +185,7 @@ describe("parse() with opts { warnings: true } ", function () {
     tolerates("{ 0 1 2 3", { "0": 1, "2": 3 });
     tolerates("{[", { "null": [] });
     tolerates("{ true 1 {", { "true": 1, "null": {} });
+    tolerates("{ 0 0 0 1 }", { "0" : 1, });
   });
 
   function errorCases(parse) {

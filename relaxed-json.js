@@ -393,7 +393,23 @@
             throw err;
           }
         }
+
         key = token.value;
+
+        if (state.duplicate && Object.prototype.hasOwnProperty.call(obj, key)) {
+          message = "Duplicate key: " + key;
+          if (state.tolerant) {
+            state.warnings.push({
+              message: message,
+              line: token.line,
+            });
+          } else {
+            err = new SyntaxError(message);
+            err.line = token.line;
+            throw err;
+          }
+        }
+
         skipColon(tokens, state);
         value = parseAny(tokens, state);
 
@@ -436,7 +452,6 @@
     // Rest
     while (true) {
       token = popToken(tokens, state);
-
 
       if (token.type !== "]" && token.type !== ",") {
         message = "Unexpected token: " + strToken(token) + ", expected ',' or ']'";
@@ -511,7 +526,7 @@
     }
 
     if (end && state.pos < tokens.length) {
-      message = "Unexpected token: " + strToken(token[state.pos]) + ", expected end-of-input";
+      message = "Unexpected token: " + strToken(tokens[state.pos]) + ", expected end-of-input";
       if (state.tolerant) {
         state.warnings.push({
           message: message,
@@ -547,6 +562,7 @@
     opts.relaxed = opts.relaxed !== undefined ? opts.relaxed : true;
     opts.warnings = opts.warnings || opts.tolerant || false;
     opts.tolerant = opts.tolerant || false;
+    opts.duplicate = opts.duplicate || false;
 
     if (!opts.warnings && !opts.relaxed) {
       return JSON.parse(text, opts.reviver);
@@ -565,7 +581,7 @@
         return token.type !== " ";
       });
 
-      var state = { pos: 0, reviver: opts.reviver, tolerant: opts.tolerant, warnings: [] };
+      var state = { pos: 0, reviver: opts.reviver, tolerant: opts.tolerant, duplicate: opts.duplicate, warnings: [] };
       return parseAny(tokens, state, true);
     } else {
       var newtext = tokens.reduce(function (str, token) {

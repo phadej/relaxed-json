@@ -7,6 +7,7 @@ $(function () {
 	var prettifyEl = $("#prettify-checkbox:checkbox");
 	var relaxedEl = $("#relaxed-checkbox:checkbox");
 	var tolerantEl = $("#tolerant-checkbox:checkbox");
+	var duplicateEl = $("#duplicate-checkbox:checkbox");
 	var errorsEl = $("#errors");
 
 	var errorLineH;
@@ -37,6 +38,7 @@ $(function () {
 			v = RJSON.parse(i, {
 				relaxed: relaxedEl.is(":checked"),
 				tolerant: tolerantEl.is(":checked"),
+				duplicate: duplicateEl.is(":checked"),
 				warnings: true,
 			});
 			fromCmEl.removeClass("error");
@@ -79,9 +81,10 @@ $(function () {
 	// initial
 	transform();
 
-	// onclick
+	// events
 	prettifyEl.on("change", transform);
 	relaxedEl.on("change", transform);
-	tolerantEl.on("tolerant", transform);
+	tolerantEl.on("change", transform);
+	duplicateEl.on("change", transform);
 	cmFrom.on("change", transform);
 });
