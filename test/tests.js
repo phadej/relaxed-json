@@ -148,6 +148,28 @@ describe("parse() with opts { warnings: true } ", function () {
     assert.deepEqual(rjson.parse(input, { warnings: true , reviver: reviver }), { bar : 2});
   });
 
+  describe("tolerant parser", function () {
+    function tolerates(value, expected) {
+      it("tolerates " + value, function () {
+        var thrown = false;
+        try {
+            rjson.parse(value, { tolerant: true });
+        } catch (e) {
+          thrown = true;
+          assert.deepEqual(e.obj, expected);
+        }
+
+        assert(thrown, "should throw");
+      });
+    }
+
+    tolerates("[[[", [[[]]]);
+    tolerates("{", {});
+    tolerates("{ 0 1 2 3", { "0": 1, "2": 3 });
+    tolerates("{[", { "null": [] });
+    tolerates("{ true 1 {", { "true": 1, "null": {} });
+  });
+
   function errorCases(parse) {
     it("throws on empty input", function () {
       assert.throws(function () {
