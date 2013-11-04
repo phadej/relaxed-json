@@ -337,6 +337,7 @@
     var token = popToken(tokens, state);
     var ret;
     var err;
+    var message;
 
     switch (token.type) {
     case "{":
@@ -366,9 +367,24 @@
       ret = state.reviver ? state.reviver("", ret) : ret;
     }
 
-    if (end && state.pos !== tokens.length) {
-      err = new SyntaxError("Unexpected token: " + tokens[0].type + ", expected end-of-input");
-      err.line = tokens[0].line;
+    if (end && state.pos < tokens.length) {
+      message = "Unexpected token: " + tokens[state.pos].type + ", expected end-of-input";
+      if (state.tolerant) {
+        state.warnings.push({ line: tokens[state.pos].line, message: message });
+      } else {
+        err = new SyntaxError(message);
+        err.line = tokens[state.pos].line;
+        throw err;
+      }
+    }
+
+    // Throw error at the end
+    if (end && state.tolerant && state.warnings.length !== 0) {
+      message = state.warnings.length === 1 ? state.warnings[0].message : state.warnings.length + " parse warnings";
+      err = new SyntaxError(message);
+      err.line = state.warnings[0].line;
+      err.warnings = state.warnings;
+      err.obj = ret;
       throw err;
     }
 
@@ -383,7 +399,8 @@
     }
 
     opts.relaxed = opts.relaxed !== undefined ? opts.relaxed : true;
-    opts.warnings = opts.warnings !== undefined ? opts.warnings : false;
+    opts.warnings = opts.warnings || opts.tolerant || false;
+    opts.tolerant = opts.tolerant || false;
 
     if (!opts.warnings && !opts.relaxed) {
       return JSON.parse(text, opts.reviver);
@@ -402,7 +419,7 @@
         return token.type !== " ";
       });
 
-      var state = { pos: 0, reviver: opts.reviver };
+      var state = { pos: 0, reviver: opts.reviver, tolerant: opts.tolerant, warnings: [] };
       return parseAny(tokens, state, true);
     } else {
       var newtext = tokens.reduce(function (str, token) {

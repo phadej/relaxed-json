@@ -225,6 +225,12 @@ describe("parse() with opts { warnings: true } ", function () {
     });
   });
 
+  describe("error cases - rjson.parse { relaxed: false, tolerant: true }", function () {
+    errorCases(function (text) {
+      return rjson.parse(text, { relaxed: false, tolerant: true });
+    });
+  });
+
   describe("error cases - rjson.parse { warnings: true }", function () {
     errorCases(function (text) {
       return rjson.parse(text, { warnings: true });

@@ -81,12 +81,23 @@ module.exports = function(grunt) {
         }
       },
     },
+    watch: {
+      less: {
+        files: "<%= less.web.src %>",
+        tasks: ["less"],
+      },
+      uglify: {
+        files: "<%= uglify.web.src %>",
+        tasks: ["uglify:web"],
+      },
+    },
   });
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-contrib-less");
+  grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-simple-mocha");
 
   // Default task.

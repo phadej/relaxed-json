@@ -6,6 +6,7 @@ $(function () {
 	var toTextareaEl = $("#area-to textarea");
 	var prettifyEl = $("#prettify-checkbox:checkbox");
 	var relaxedEl = $("#relaxed-checkbox:checkbox");
+	var tolerantEl = $("#tolerant-checkbox:checkbox");
 	var errorsEl = $("#errors");
 
 	var errorLineH;
@@ -35,6 +36,7 @@ $(function () {
 			t = RJSON.transform(i);
 			v = RJSON.parse(i, {
 				relaxed: relaxedEl.is(":checked"),
+				tolerant: tolerantEl.is(":checked"),
 				warnings: true,
 			});
 			fromCmEl.removeClass("error");
@@ -49,11 +51,18 @@ $(function () {
 				}
 			}
 			errorsEl.html(e.toString());
-			return;
+
+			// when tolerant, we still get something
+			if (e.obj) {
+				v = e.obj;
+				t = JSON.stringify(v, null, 2);
+			} else {
+				return;
+			}
 		}
 
 		if (prettifyEl.is(":checked")) {
-			cmTo.setValue(v !== undefined ? JSON.stringify(v, null, "  ") : t);
+			cmTo.setValue(v !== undefined ? JSON.stringify(v, null, 2) : t);
 		} else {
 			cmTo.setValue(t);
 		}
@@ -65,5 +74,6 @@ $(function () {
 	// onclick
 	prettifyEl.on("change", transform);
 	relaxedEl.on("change", transform);
+	tolerantEl.on("tolerant", transform);
 	cmFrom.on("change", transform);
 });
