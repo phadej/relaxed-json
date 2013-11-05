@@ -29,8 +29,19 @@ p, li, label {
 	font-family: "Computer Modern", serif;
 }
 
+p a {
+	color: #369;
+}
+
 h1, h2 {
 	font-family: "Computer Modern Bold", serif;
+}
+
+header > h1,
+article > h2,
+article > p,
+article > div > p {
+	margin-left: 10px;
 }
 
 p, li, label {
@@ -106,4 +117,29 @@ code, textarea, pre, .CodeMirror {
 .buttons {
 	clear: both;
 	padding: 10px 10px 0;
+}
+
+@animation-duration: 0.5s;
+
+#more-info {
+	max-height: 0px;
+	overflow-y: hidden;
+
+	transition: max-height @animation-duration;
+	-webkit-transition: max-height @animation-duration;
+}
+
+#expand-link {
+	transition: opacity @animation-duration;
+	-webkig-transition: opacity @animation-duration;
+}
+
+article.show-more {
+	#more-info {
+		max-height: 300px; // arbitrary big value
+	}
+
+	#expand-link {
+		opacity: 0;
+	}
 }

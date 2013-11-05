@@ -87,4 +87,14 @@ $(function () {
 	tolerantEl.on("change", transform);
 	duplicateEl.on("change", transform);
 	cmFrom.on("change", transform);
+
+	$("#expand-link").click(function (ev) {
+		ev.preventDefault();
+		$("article").addClass("show-more");
+	});
+
+	$("#collapse-link").click(function (ev) {
+		ev.preventDefault();
+		$("article").removeClass("show-more");
+	});
 });
