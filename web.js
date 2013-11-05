@@ -22,6 +22,27 @@ $(function () {
 
 	var fromCmEl = $("#area-from .CodeMirror");
 
+	var checkboxes = [
+		[prettifyEl, "prettify"],
+		[relaxedEl, "relaxed"],
+		[tolerantEl, "tolerant"],
+		[duplicateEl, "duplicate"],
+	];
+
+
+	function loadCheckbox(el, cookieName) {
+		var value = $.cookie(cookieName);
+		if (value === "true") {
+			el.prop("checked", true);
+		} else if (value === "false") {
+			el.prop("checked", false);
+		}
+	}
+
+	function saveCheckbox(el, cookieName) {
+		$.cookie(cookieName, el.is(":checked") ? "true" : "false");
+	}
+
 	function clearErrorLine() {
 		if (errorLineH) {
 			cmFrom.removeLineClass(errorLineH, "background", "error-line");
@@ -29,6 +50,11 @@ $(function () {
 	}
 
 	function transform() {
+		// set selectors
+		checkboxes.forEach(function (c) {
+			saveCheckbox(c[0], c[1]);
+		});
+
 		var t;
 		var v;
 		try {
@@ -77,6 +103,11 @@ $(function () {
 			cmTo.setValue(t);
 		}
 	}
+
+	// set selectors
+	checkboxes.forEach(function (c) {
+		loadCheckbox(c[0], c[1]);
+	});
 
 	// initial
 	transform();
