@@ -380,6 +380,12 @@
     appendPair(state, obj, key, value);
   }
 
+  function parseElement(tokens, state, arr) {
+    var key = arr.length;
+    var value = parseAny(tokens, state);
+    arr[key] = state.reviver ? state.reviver("" + key, value) : value;
+  }
+
   function parseObject(tokens, state) {
     var token = skipPunctuation(tokens, state, [":", "}"]);
     var obj = {};
@@ -432,7 +438,6 @@
   function parseArray(tokens, state) {
     var token = skipPunctuation(tokens, state, ["]"]);
     var arr = [];
-    var key = 0, value;
 
     if (token.type === "eof") {
       raiseUnexpected(state, token, "']' or json object");
@@ -449,9 +454,7 @@
 
     default:
       state.pos -= 1; // push the token back
-      value = parseAny(tokens, state);
-
-      arr[key] = state.reviver ? state.reviver("" + key, value) : value;
+      parseElement(tokens, state, arr);
       break;
     }
 
@@ -475,9 +478,7 @@
           return arr;
 
         case ",":
-          key += 1;
-          value = parseAny(tokens, state);
-          arr[key] = state.reviver ? state.reviver("" + key, value) : value;
+          parseElement(tokens, state, arr);
           break;
       }
     }
