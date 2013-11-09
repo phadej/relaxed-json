@@ -444,11 +444,26 @@
     }
   }
 
+  function endChecks(tokens, state, ret) {
+    if (state.pos < tokens.length) {
+      raiseError(state, tokens[state.pos],
+        "Unexpected token: " + strToken(tokens[state.pos]) + ", expected end-of-input");
+    }
+
+    // Throw error at the end
+    if (state.tolerant && state.warnings.length !== 0) {
+      var message = state.warnings.length === 1 ? state.warnings[0].message : state.warnings.length + " parse warnings";
+      var err = new SyntaxError(message);
+      err.line = state.warnings[0].line;
+      err.warnings = state.warnings;
+      err.obj = ret;
+      throw err;
+    }
+  }
+
   function parseAny(tokens, state, end) {
     var token = skipPunctuation(tokens, state);
     var ret;
-    var err;
-    var message;
 
     if (token.type === "eof") {
       raiseUnexpected(state, token, "json object");
@@ -470,30 +485,7 @@
 
     if (end) {
       ret = state.reviver ? state.reviver("", ret) : ret;
-    }
-
-    if (end && state.pos < tokens.length) {
-      message = "Unexpected token: " + strToken(tokens[state.pos]) + ", expected end-of-input";
-      if (state.tolerant) {
-        state.warnings.push({
-          message: message,
-          line: tokens[state.pos].line,
-        });
-      } else {
-        err = new SyntaxError(message);
-        err.line = tokens[state.pos].line;
-        throw err;
-      }
-    }
-
-    // Throw error at the end
-    if (end && state.tolerant && state.warnings.length !== 0) {
-      message = state.warnings.length === 1 ? state.warnings[0].message : state.warnings.length + " parse warnings";
-      err = new SyntaxError(message);
-      err.line = state.warnings[0].line;
-      err.warnings = state.warnings;
-      err.obj = ret;
-      throw err;
+      endChecks(tokens, state, ret);
     }
 
     return ret;
