@@ -52,6 +52,7 @@ module.exports = function(grunt) {
           "components/codemirror.js",
           "components/cm-mode-javascript.js",
           "components/jquery-2.0.3.js",
+          "components/underscore.js",
           "components/jquery.cookie.js",
           "relaxed-json.js",
           "web.js",

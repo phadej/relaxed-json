@@ -1,4 +1,4 @@
-/* global $, CodeMirror, RJSON */
+/* global $, _, CodeMirror, RJSON */
 $(function () {
 	"use strict";
 
@@ -10,7 +10,7 @@ $(function () {
 	var duplicateEl = $("#duplicate-checkbox:checkbox");
 	var errorsEl = $("#errors");
 
-	var errorLineH;
+	var errorLineHandles = [];
 
 	var cmFrom = CodeMirror.fromTextArea(fromTextareaEl[0], {
 		mode: "javascript",
@@ -44,8 +44,20 @@ $(function () {
 	}
 
 	function clearErrorLine() {
-		if (errorLineH) {
-			cmFrom.removeLineClass(errorLineH, "background", "error-line");
+		errorLineHandles.forEach(function (h) {
+			cmFrom.removeLineClass(h, "background", "error-line");
+		});
+	}
+
+	function errorLines(ex) {
+		if (!ex) {
+			return [];
+		} else if (ex.warnings && ex.warnings.length !== 0) {
+			return _.pluck(ex.warnings, "line");
+		} else if (ex.line) {
+			return [ex.line];
+		} else {
+			return [];
 		}
 	}
 
@@ -70,12 +82,18 @@ $(function () {
 			fromCmEl.removeClass("error");
 			clearErrorLine();
 		} catch (ex) {
+			clearErrorLine();
 			fromCmEl.addClass("error");
-			if (ex && ex.line) {
-				clearErrorLine();
-				errorLineH = cmFrom.getLineHandle(ex.line - 1);
-				if (errorLineH) {
-					cmFrom.addLineClass(errorLineH, "background", "error-line");
+			var lines = errorLines(ex);
+			if (lines.length !== 0) {
+				errorLineHandles = _.uniq(lines.map(function (l) {
+					return cmFrom.getLineHandle(l - 1);
+				}));
+
+				if (errorLineHandles.length !== 0) {
+					errorLineHandles.forEach(function (h) {
+						cmFrom.addLineClass(h, "background", "error-line");
+					});
 				}
 			}
 
