@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Relaxed JSON</title>
+		<meta charset="utf-8">
+
+		<link rel="stylesheet" href="web.min.css">
+		<script src="web.min.js"></script>
+		<!--
+		<script src="components/underscore.js"></script>
+		<script src="components/jquery-2.0.3.js"></script>
+		<script src="components/jquery.cookie.js"></script>
+		<script src="components/codemirror.js"></script>
+		<script src="components/cm-mode-javascript.js"></script>
+		<script src="relaxed-json.js"></script>
+		<script src="web.js"></script>
+		-->
+	</head>
+	<body>
+		<header>
+			<h1>Relaxed JSON</h1>
+		</header>
+		<article>
+			<p>Are you frustrated that you cannot add comments into your configuration JSON
+			Relaxed JSON is a simple solution. <a id="expand-link" href="#">expand &darr;</a></p>
+
+			<div id="more-info">
+				<p>Relaxed JSON is a small JavaScript library with only two exposed function
+				<code>RJSON.transform(text : string) : string</code>
+				and <code>RJSON.parse(text : string, reviver : function | opts : object)</code>.</p>
+				<p><a href="http://oleg.fi/relaxed-json">Relaxed JSON</a> (modified BSD license) is a strict superset of JSON,
+				relaxing strictness of valilla JSON.
+				Valid, vanilla JSON will not be changed by <code>RJSON.transform</code>. But there are few additional
+				features helping writing JSON by hand.</p>
+				<ul>
+				<li>Comments are stripped : <code>// foo</code> and <code>/* bar */</code>  → <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>.
+				Comments are converted into whitespace, so your formatting is preserved.</li>
+				<li>Trailing comma is allowed : <code>[1, 2, 3, ]</code> → <code>[1, 2, 3]</code>. Works also in objects <code>{ &quot;foo&quot;: &quot;bar&quot;, }</code> → <code>{ &quot;foo&quot;: &quot;bar&quot; }</code>.</li>
+				<li>Identifiers are transformed into strings : <code>{ foo: bar }</code> → <code>{ &quot;foo&quot;: &quot;bar&quot; }</code>.</li>
+				<li>Single quoted strings are allowed : <code>&#39;say &quot;Hello&quot;&#39;</code> → <code>&quot;say \&quot;Hello\&quot;&quot;</code>.</li>
+				<li>More different characters is supported in identifiers: <code>foo-bar</code> → <code>&quot;foo-bar&quot;</code>.</li>
+				</ul>
+
+				<p>Check out the source and additional documentation on <a href="https://github.com/phadej/relaxed-json">GitHub</a>.<p>
+
+				<p><a id="collapse-link" href="#">&uarr; collapse</a>
+			</div>
+
+			<h2>Example<sup>&dagger;</sup></h2>
+
+			<div class="transform">
+				<div id="area-from" class="textarea-container">
+					<textarea>/* This is a test input
+ * Comments are omitted
+ */
+{
+  numbers: [
+    0, -0, 1, -1,
+    23.45, -23.45,
+    1e2, -1e2, 1.3e4, -1.3e4,
+    1.5e+6, -1.5e+6, 77.88e-99, -77.88e-99,
+  ],
+  object: {
+    foo: bar, // identifiers are transformed into strings
+    plus-operation: +, // and even some lispy identifiers
+    saw: /\/\/\/\/\/\,
+    'quux': null, // and single quoted strings are allowed
+    t: /* boolean */ true,
+    f: false,
+    say: 'Hello, "World"',
+    escaping1: "Foo \"bar'",
+    escaping2: 'Foo "bar\'',
+    escaping3: "Foo\nbar in \"quux\"",
+  }, // trailing comma
+}
+</textarea>
+				</div>
+
+				<div id="area-to" class="textarea-container">
+					<textarea></textarea>
+				</div>
+
+				<div class="buttons">
+					<label><input type="checkbox" id="relaxed-checkbox" checked="checked" />Relaxed</label>
+					<label><input type="checkbox" id="tolerant-checkbox" checked="checked" />Tolerant</label>
+					<label><input type="checkbox" id="duplicate-checkbox" checked="checked" />Warn on duplicate keys</label>
+					<label><input type="checkbox" id="prettify-checkbox" />Prettify</label>
+				</div>
+
+				<div id="errors"></div>
+
+				<p><sup>&dagger;</sup> This is a JSON linter!</p>
+			</div>
+
+			<p><em>Relaxed JSON</em>, by <a href="http://oleg.fi/" title="Oleg Grenrus">Oleg Grenrus</a></p>
+		</article>
+
+		<a href="https://github.com/phadej/relaxed-json"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+	</body>
+</html>
