@@ -185,32 +185,38 @@
   var lexer = makeLexer(tokenSpecs(true));
   var strictLexer = makeLexer(tokenSpecs(false));
 
-  function transformTokens(tokens) {
-    return tokens.reduce(function (tokens, token) {
-      // not so functional, js list aren't
+  function previousNWSToken(tokens, index) {
+    for (; index >= 0; index--) {
+      if (tokens[index].type !== " ") {
+        return index;
+      }
+    }
+  }
 
-      // do stuff only if curren token is ] or }
-      if (tokens.length !== 0 && (token.type === "]" || token.type === "}")) {
-        var i = tokens.length - 1;
+  function stripTrailingComma(tokens) {
+    var res = [];
 
+    tokens.forEach(function (token, index) {
+      if (token.type === "]" || token.type === "}") {
         // go backwards as long as there is whitespace, until first comma
-        while (true) {
-          if (tokens[i].type === " ") {
-            i -= 1;
-            continue;
-          } else if (tokens[i].type === ",") {
-            // remove comma
-            tokens.splice(i, 1);
+        var commaI = previousNWSToken(res, index - 1);
+
+        if (res[commaI].type === ",") {
+          var preCommaI = previousNWSToken(res, commaI - 1);
+          if (res[preCommaI].type !== "[" && res[preCommaI].type !== "{") {
+            res[commaI] = {
+              type: " ",
+              match: " ",
+              line: tokens[commaI].line,
+            };
           }
-          break;
         }
       }
 
-      // push current token in place
-      tokens.push(token);
+      res.push(token);
+    });
 
-      return tokens;
-    }, []);
+    return res;
   }
 
   function transform(text) {
@@ -218,7 +224,7 @@
     var tokens = lexer(text);
 
     // remove trailing commas
-    tokens = transformTokens(tokens);
+    tokens = stripTrailingComma(tokens);
 
     // concat stuff
     return tokens.reduce(function (str, token) {
@@ -511,7 +517,7 @@
 
     if (opts.relaxed) {
       // Strip commas
-      tokens = transformTokens(tokens);
+      tokens = stripTrailingComma(tokens);
     }
 
     if (opts.warnings) {

@@ -202,6 +202,13 @@ describe("parse() with opts { warnings: true } ", function () {
         parse(" ");
       });
     });
+
+    it("throws on [,]", function () {
+      assert.throws(function () {
+        parse("[,]");
+      });
+    });
+
     it("throws on unexpected token at beginning", function () {
       assert.throws(function () {
         parse("}");
