@@ -36,6 +36,7 @@ features helping writing JSON by hand.
 
 ## Changelog
 
+- 0.2.2 Bugfix
 - 0.2.1 Code reogranization
   - More though into toleration, handles valid json without colons and commas
   - trailing comma stripping is more strict
