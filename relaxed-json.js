@@ -270,6 +270,47 @@
     }
   }
 
+  function skipPunctuation(tokens, state, valid) {
+    var punctuation = [",", ":", "]", "}"];
+    var token = popToken(tokens, state);
+    while (true) {
+      if (valid && valid.indexOf(token.type) !== -1) {
+        return token;
+      } else if (token.type === "eof") {
+        return token;
+      } else if (punctuation.indexOf(token.type) !== -1) {
+        var message = "Unexpected token: " + strToken(token) + ", expected '[', '{', number, string or atom";
+        if (state.tolerant) {
+          state.warnings.push({
+            message: message,
+            line: token.line,
+          });
+          token = popToken(tokens, state);
+        } else {
+          var err = new SyntaxError(message);
+          err.line = token.line;
+          throw err;
+        }
+      } else {
+        return token;
+      }
+    }
+  }
+
+  function raiseUnexpected(state, token, expected) {
+    var message = "Unexpected token: " + strToken(token) + ", expected " + expected;
+    if (state.tolerant) {
+      state.warnings.push({
+        message: message,
+        line: token.line,
+      });
+    } else {
+      var err = new SyntaxError(message);
+      err.line = token.line;
+      throw err;
+    }
+  }
+
   function parseObject(tokens, state) {
     var token = popToken(tokens, state);
     var obj = {};
@@ -441,29 +482,15 @@
   }
 
   function parseArray(tokens, state) {
-    var token = popToken(tokens, state);
+    var token = skipPunctuation(tokens, state, ["]"]);
     var arr = [];
     var key = 0, value;
-    var err;
-    var message;
 
-    if (state.tolerant) {
-      if (token.type === "eof") {
-        state.warnings.push({
-          message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
-          line: token.line,
-        });
-        token.type = "]";
-      } else if (token.type === ",") {
-        state.warnings.push({
-          message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
-          line: token.line,
-        });
-
-        state.pos -= 1;
+    if (token.type === "eof") {
+      raiseUnexpected(state, token, "']' or json object");
+      if (state.tolerant) {
         token = {
-          type: "atom",
-          value: null,
+          type: "]",
           line: token.line,
         };
       }
@@ -472,11 +499,6 @@
     switch (token.type) {
     case "]":
       return [];
-
-    case "atom":
-      value = token.value;
-      arr[key] = state.reviver ? state.reviver("" + key, value) : value;
-      break;
 
     default:
       state.pos -= 1; // push the token back
@@ -491,24 +513,15 @@
       token = popToken(tokens, state);
 
       if (token.type !== "]" && token.type !== ",") {
-        message = "Unexpected token: " + strToken(token) + ", expected ',' or ']'";
-        var newtype = token.type === "eof" ? "]" : ",";
-        if (state.tolerant) {
-          state.warnings.push({
-            message: message + "; assuming '" + newtype + "'",
-            line: token.line,
-          });
+        raiseUnexpected(state, token, "',' or ']'");
 
+        if (state.tolerant) {
           token = {
-            type: newtype,
+            type: token.type === "eof" ? "]" : ",",
             line: token.line,
           };
 
           state.pos -= 1;
-        } else {
-          err = new SyntaxError(message);
-          err.line = token.line;
-          throw err;
         }
       }
 
@@ -518,15 +531,7 @@
 
         case ",":
           key += 1;
-          if (state.tolerant && (tokens[state.pos] && tokens[state.pos].type === ",")) {
-            value = null;
-            state.warnings.push({
-              message: "Unexpected token: " + strToken(token) + ", expected ']' or json object",
-              line: token.line,
-            });
-          } else {
-            value = parseAny(tokens, state);
-          }
+          value = parseAny(tokens, state);
           arr[key] = state.reviver ? state.reviver("" + key, value) : value;
           break;
       }
@@ -534,10 +539,14 @@
   }
 
   function parseAny(tokens, state, end) {
-    var token = popToken(tokens, state);
+    var token = skipPunctuation(tokens, state);
     var ret;
     var err;
     var message;
+
+    if (token.type === "eof") {
+      raiseUnexpected(state, token, "json object");
+    }
 
     switch (token.type) {
     case "{":
@@ -551,19 +560,6 @@
     case "atom":
       ret = token.value;
       break;
-    default:
-      message = "Unexpected token: " + strToken(token) + ", expected '[', '{', number, string or atom";
-      if (state.tolerant) {
-        state.warnings.push({
-          message: message + "; assuming null",
-          line: token.line,
-        });
-        ret = null;
-      } else {
-        err = new SyntaxError();
-        err.line = token.line;
-        throw err;
-      }
     }
 
     if (end) {
