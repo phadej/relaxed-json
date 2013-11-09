@@ -194,6 +194,42 @@ describe("parse() with opts { warnings: true } ", function () {
     tolerates("[,,,,]", []);
     tolerates("{,0 1,,,}", { "0": 1 });
     tolerates("{,0 1,,,2 3}", { "0": 1, "2": 3 });
+
+    it("handles json without colons and commas", function () {
+      function noCommaColon(v) {
+         if (typeof v === "string") {
+          return !/[,:]/.test(v);
+
+        } else if (Array.isArray(v)) {
+          return v.every(noCommaColon);
+
+        } else if (new Object(v) === v) {
+          var keys = Object.keys(v);
+          return keys.every(noCommaColon) &&
+            keys.map(function (k) { return v[k]; }).every(noCommaColon);
+
+        } else {
+          return true;
+        }
+      }
+
+      var jsonNoCommaColon = jsc.suchthat(jsc.value(), noCommaColon) ;
+
+      var property = jsc.forall(jsonNoCommaColon, function (x) {
+        var t = JSON.stringify(x, null, 2).replace(/[,:]/g, " ");
+
+        var p;
+        try {
+          p = rjson.parse(t, { tolerant: true, relaxed: false });
+        } catch (e) {
+          p = e.obj;
+        }
+
+        return _.isEqual(p, x);
+      });
+
+      jsc.assert(property, jscOpts);
+    });
   });
 
   function errorCases(parse) {

@@ -36,7 +36,7 @@ features helping writing JSON by hand.
 ## Changelog
 
 - 0.2.1 Code reogranization
-  - More though into toleration
+  - More though into toleration, handles valid json without colons and commas
   - trailing comma stripping is more strict
 - 0.2.0 Shiny new features
   - overloaded `rjson.parse`
