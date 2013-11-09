@@ -387,74 +387,42 @@
   }
 
   function parseObject(tokens, state) {
-    var token = skipPunctuation(tokens, state, [":", "}"]);
-    var obj = {};
-
-    if (token.type === "eof") {
-      raiseUnexpected(state, token, "'}' or string");
-      
-      token = {
-        type: "}",
-        line: token.line,
-      };
-    }
-
-    switch (token.type) {
-    case "}":
-      return {};
-
-    default:
-      state.pos -= 1; // push the token back
-      parsePair(tokens, state, obj);
-      break;
-    }
-
-    // Rest
-    while (true) {
-      token = popToken(tokens, state);
-
-      if (token.type !== "}" && token.type !== ",") {
-        raiseUnexpected(state, token, "',' or '}'");
-
-        token = {
-          type: token.type === "eof" ? "}" : ",",
-          line: token.line,
-        };
-
-        state.pos -= 1;
-      }
-
-      switch (token.type) {
-      case "}":
-        return obj;
-
-      case ",":
-        parsePair(tokens, state, obj);
-        break;
-      }
-    }
+    return parseMany(tokens, state, {}, {
+      skip: [":", "}"],
+      elementParser: parsePair,
+      elementName: "string",
+      endSymbol: "}",
+    });
   }
 
   function parseArray(tokens, state) {
-    var token = skipPunctuation(tokens, state, ["]"]);
-    var arr = [];
+    return parseMany(tokens, state, [], {
+      skip: ["]"],
+      elementParser: parseElement,
+      elementName: "json object",
+      endSymbol: "]",
+    });
+  }
+
+  function parseMany(tokens, state, obj, opts) {
+    var token = skipPunctuation(tokens, state, opts.skip);
 
     if (token.type === "eof") {
-      raiseUnexpected(state, token, "']' or json object");
-
+      raiseUnexpected(state, token, "'" + opts.endSymbol + "' or " + opts.elementName);
+      
       token = {
-        type: "]",
+        type: opts.endSymbol,
         line: token.line,
       };
     }
 
     switch (token.type) {
-    case "]":
-      return [];
+    case opts.endSymbol:
+      return obj;
 
     default:
       state.pos -= 1; // push the token back
-      parseElement(tokens, state, arr);
+      opts.elementParser(tokens, state, obj);
       break;
     }
 
@@ -462,11 +430,11 @@
     while (true) {
       token = popToken(tokens, state);
 
-      if (token.type !== "]" && token.type !== ",") {
-        raiseUnexpected(state, token, "',' or ']'");
+      if (token.type !== opts.endSymbol && token.type !== ",") {
+        raiseUnexpected(state, token, "',' or '" + opts.endSymbol + "'");
 
         token = {
-          type: token.type === "eof" ? "]" : ",",
+          type: token.type === "eof" ? opts.endSymbol : ",",
           line: token.line,
         };
 
@@ -474,12 +442,12 @@
       }
 
       switch (token.type) {
-        case "]":
-          return arr;
+      case opts.endSymbol:
+        return obj;
 
-        case ",":
-          parseElement(tokens, state, arr);
-          break;
+      case ",":
+        opts.elementParser(tokens, state, obj);
+        break;
       }
     }
   }
