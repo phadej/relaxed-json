@@ -201,9 +201,9 @@
         // go backwards as long as there is whitespace, until first comma
         var commaI = previousNWSToken(res, index - 1);
 
-        if (res[commaI].type === ",") {
+        if (commaI && res[commaI].type === ",") {
           var preCommaI = previousNWSToken(res, commaI - 1);
-          if (res[preCommaI].type !== "[" && res[preCommaI].type !== "{") {
+          if (preCommaI && res[preCommaI].type !== "[" && res[preCommaI].type !== "{") {
             res[commaI] = {
               type: " ",
               match: " ",

@@ -170,7 +170,7 @@ describe("parse() with opts { warnings: true } ", function () {
       it("tolerates " + value, function () {
         var thrown = false;
         try {
-            rjson.parse(value, { tolerant: true });
+          rjson.parse(value, { tolerant: true });
         } catch (e) {
           thrown = true;
           assert.deepEqual(e.obj, expected);
@@ -226,6 +226,58 @@ describe("parse() with opts { warnings: true } ", function () {
         }
 
         return _.isEqual(p, x);
+      });
+
+      jsc.assert(property, jscOpts);
+    });
+
+    it("terminates always", function () {
+      var token = {
+        arbitrary: function (size) {
+          size = jsc._.getRandomInt(0, 8);
+          switch (size) {
+            case 0: return "[";
+            case 1: return "]";
+            case 2: return "{";
+            case 3: return "}";
+            case 4: return ",";
+            case 5: return ":";
+            case 6: return "\"" + jsc.string().arbitrary(size).replace(/["\\]/g, "") + "\"";
+            case 7: return jsc.integer().arbitrary(size);
+            case 8: return jsc.oneof([null, true, false]).arbitrary();
+          }
+        },
+        shrink: function () { return []; },
+      };
+
+      var property = jsc.forall(jsc.array(token), function (l) {
+        var t = l.join(" ");
+
+        try {
+          JSON.parse(t);
+        } catch (e) {
+          if (e.name !== "SyntaxError") {
+            return false;
+          }
+        }
+
+        try {
+          rjson.parse(t);
+        } catch (e) {
+          if (e.name !== "SyntaxError") {
+            return false;
+          }
+        }
+
+        try {
+          rjson.parse(t, { tolerant: true, relaxed: false });
+        } catch (e) {
+          if (e.name !== "SyntaxError") {
+            return false;
+          }
+        }
+
+        return true;
       });
 
       jsc.assert(property, jscOpts);
