@@ -32,3 +32,16 @@ features helping writing JSON by hand.
   - `relaxed`: use relaxed version of JSON (default: true)
   - `warnings`: use relaxed JSON own parser, supports better error messages (default: false).
   - `duplicate`: fail if there are duplicate keys in objects
+
+## Changelog
+
+- 0.2.1 Code reogranization
+  - More though into toleration
+  - trailing comma stripping is more strict
+- 0.2.0 Shiny new features
+  - overloaded `rjson.parse`
+  - tolerating parser support
+  - duplicate key warning
+  - test suite (!)
+- 0.1.1 RJSON.parse
+- 0.1.0 Initial release
