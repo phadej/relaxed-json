@@ -83,76 +83,76 @@
     };
   }
 
+  function fStringSingle(m) {
+    // String in single quotes
+    var content = m[1].replace(/([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})/g, function (m) {
+      if (m === "\"") {
+        return "\\\"";
+      } else if (m === "\\'") {
+        return "'";
+      } else {
+        return m;
+      }
+    });
+
+    return {
+      type: "string",
+      match: "\"" + content + "\"",
+      value: JSON.parse("\"" + content + "\""), // abusing real JSON.parse to unquote string
+    };
+  }
+
+  function fStringDouble(m) {
+    return {
+      type: "string",
+      match: m[0],
+      value: JSON.parse(m[0]),
+    };
+  }
+
+  function fIdentifier(m) {
+    // identifiers are transformed into strings
+    return {
+      type: "string",
+      value: m[0],
+      match: "\"" + m[0].replace(/./g, function (c) {
+      return c === "\\" ? "\\\\" : c;
+    }) + "\"" };
+  }
+
+  function fComment(m) {
+    // comments are whitespace, leave only linefeeds
+    return { type: " ", match: m[0].replace(/./g, function (c) {
+      return (/\s/).test(c) ? c : " ";
+    }) };
+  }
+
+  function fNumber(m) {
+    return {
+      type : "number",
+      match: m[0],
+      value: parseFloat(m[0]),
+    };
+  }
+
+  function fKeyword(m) {
+    var value;
+    switch (m[1]) {
+    case "null": value = null; break;
+    case "true": value = true; break;
+    case "false": value = false; break;
+    }
+    return {
+      type: "atom",
+      match: m[0],
+      value: value,
+    };
+  }
+
   function tokenSpecs(relaxed) {
     function f(type) {
       return function(m) {
         return { type: type, match: m[0] };
-      };
-    }
-
-    function fStringSingle(m) {
-      // String in single quotes
-      var content = m[1].replace(/([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})/g, function (m) {
-        if (m === "\"") {
-          return "\\\"";
-        } else if (m === "\\'") {
-          return "'";
-        } else {
-          return m;
-        }
-      });
-
-      return {
-        type: "string",
-        match: "\"" + content + "\"",
-        value: JSON.parse("\"" + content + "\""), // abusing real JSON.parse to unquote string
-      };
-    }
-
-    function fStringDouble(m) {
-      return {
-        type: "string",
-        match: m[0],
-        value: JSON.parse(m[0]),
-      };
-    }
-
-    function fIdentifier(m) {
-      // identifiers are transformed into strings
-      return {
-        type: "string",
-        value: m[0],
-        match: "\"" + m[0].replace(/./g, function (c) {
-        return c === "\\" ? "\\\\" : c;
-      }) + "\"" };
-    }
-
-    function fComment(m) {
-      // comments are whitespace, leave only linefeeds
-      return { type: " ", match: m[0].replace(/./g, function (c) {
-        return (/\s/).test(c) ? c : " ";
-      }) };
-    }
-
-    function fNumber(m) {
-      return {
-        type : "number",
-        match: m[0],
-        value: parseFloat(m[0]),
-      };
-    }
-
-    function fKeyword(m) {
-      var value;
-      switch (m[1]) {
-      case "null": value = null; break;
-      case "true": value = true; break;
-      case "false": value = false; break;
-      }
-      return {
-        type: "atom",
-        match: m[0],
-        value: value,
       };
     }
 
