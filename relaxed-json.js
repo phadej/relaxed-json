@@ -311,71 +311,80 @@
     }
   }
 
+  function parsePair(tokens, state) {
+    var token = skipPunctuation(tokens, state, [":"]);
+    var key, value;
+
+    if (token.type !== "string") {
+      raiseUnexpected(state, token, "string");
+      switch (token.type) {
+      case ":":
+        token = {
+          type: "string",
+          value: "null",
+          line:  token.line,
+        };
+
+        state.pos -= 1;
+        break;
+
+      case "number":
+      case "atom":
+        token = {
+          type: "string",
+          value: ""+token.value,
+          line: token.line,
+        };
+        break;
+
+      case "[":
+      case "{":
+        state.pos -= 1;
+        value = parseAny(tokens, state);
+        return {
+          key: "null",
+          value: value,
+        };
+      }
+    }
+
+    key = token.value;
+    skipColon(tokens, state);
+    value = parseAny(tokens, state);
+
+    return {
+      key: key,
+      value: value,
+    };
+  }
+
   function parseObject(tokens, state) {
-    var token = popToken(tokens, state);
+    var token = skipPunctuation(tokens, state, [":", "}"]);
     var obj = {};
     var key, value;
+    var pair;
     var err;
     var message;
 
-    while (token.type !== "}" && token.type !== "string") {
-      message = "Unexpected token: " + strToken(token) + ", expected '}' or string";
-
-      if (state.tolerant) {
-        state.warnings.push({
-          message: message,
-          line: token.line,
-        });
-
-        if (token.type === ",") {
-          token = popToken(tokens, state);
-          continue;
-        }
-
-        if (token.type !== "eof" && token.type !== "number" && token.type !== "atom") {
-          state.pos -= 1;
-        }
-
-        if (token.type === "number" || token.type === "atom") {
-          token = {
-            type: "string",
-            value: ""+token.value,
-            line: token.line,
-          };
-        } else if (token.type === "eof") {
-          token = {
-            type: "}",
-            line: token.line,
-          };
-        } else {
-          token = {
-            type: "string",
-            value: "null",
-            line: token.line,
-          };
-        }
-
-      } else {
-        err = new SyntaxError(message);
-        err.line = token.line;
-        throw err;
-      }
-
-      break;
+    if (token.type === "eof") {
+      raiseUnexpected(state, token, "'}' or string");
+      
+      token = {
+        type: "}",
+        line: token.line,
+      };
     }
 
     switch (token.type) {
     case "}":
       return {};
 
-    case "string":
-      key = token.value;
-      skipColon(tokens, state);
-      value = parseAny(tokens, state);
-
-      value = state.reviver ? state.reviver(key, value) : value;
+    default:
+      state.pos -= 1; // push the token back
+      pair = parsePair(tokens, state);
+      value = state.reviver ? state.reviver(pair.key, pair.value) : pair.value;
       if (value !== undefined) {
-        obj[key] = value;
+        obj[pair.key] = value;
       }
       break;
     }
@@ -385,26 +394,14 @@
       token = popToken(tokens, state);
 
       if (token.type !== "}" && token.type !== ",") {
-        message = "Unexpected token: " + strToken(token) + ", expected ',' or ']'";
-        var newtype = token.type === "eof" ? "}" : ",";
-        if (state.tolerant) {
+        raiseUnexpected(state, token, "',' or '}'");
 
-          state.warnings.push({
-            message: message + "; assuming '" + newtype + "'",
-            line: token.line,
-          });
+        token = {
+          type: token.type === "eof" ? "}" : ",",
+          line: token.line,
+        };
 
-          token = {
-            type: newtype,
-            line: token.line,
-          };
-
-          state.pos -= 1;
-        } else {
-          err = new SyntaxError(message);
-          err.line = token.line;
-          throw err;
-        }
+        state.pos -= 1;
       }
 
       switch (token.type) {
@@ -412,48 +409,9 @@
         return obj;
 
       case ",":
-        token = popToken(tokens, state);
-        while (token.type !== "string") {
-          message = "Unexpected token: " + strToken(token) + ", expected string";
-          if (state.tolerant) {
-            state.warnings.push({
-              message: message,
-              line: token.line,
-            });
+        pair = parsePair(tokens, state);
 
-            if (token.type === ",") {
-              token = popToken(tokens, state);
-              continue;
-            }
-
-            if (token.type === "}") {
-              return obj;
-            }
-
-            if (token.type === "number" || token.type === "atom") {
-              token = {
-                type: "string",
-                value: "" + token.value,
-                line: token.line,
-              };
-            } else {
-              token = {
-                type: "string",
-                value: "null",
-                line: token.line,
-              };
-
-              state.pos -= 1;
-            }
-          } else {
-            err = new SyntaxError(message);
-            err.line = token.line;
-            throw err;
-          }
-          break;
-        }
-
-        key = token.value;
+        key = pair.key;
 
         if (state.duplicate && Object.prototype.hasOwnProperty.call(obj, key)) {
           message = "Duplicate key: " + key;
@@ -469,12 +427,9 @@
           }
         }
 
-        skipColon(tokens, state);
-        value = parseAny(tokens, state);
-
-        value = state.reviver ? state.reviver(key, value) : value;
+        value = state.reviver ? state.reviver(pair.key, pair.value) : pair.value;
         if (value !== undefined) {
-          obj[key] = value;
+          obj[pair.key] = value;
         }
         break;
       }
@@ -488,12 +443,11 @@
 
     if (token.type === "eof") {
       raiseUnexpected(state, token, "']' or json object");
-      if (state.tolerant) {
-        token = {
-          type: "]",
-          line: token.line,
-        };
-      }
+
+      token = {
+        type: "]",
+        line: token.line,
+      };
     }
 
     switch (token.type) {
@@ -515,14 +469,12 @@
       if (token.type !== "]" && token.type !== ",") {
         raiseUnexpected(state, token, "',' or ']'");
 
-        if (state.tolerant) {
-          token = {
-            type: token.type === "eof" ? "]" : ",",
-            line: token.line,
-          };
+        token = {
+          type: token.type === "eof" ? "]" : ",",
+          line: token.line,
+        };
 
-          state.pos -= 1;
-        }
+        state.pos -= 1;
       }
 
       switch (token.type) {
