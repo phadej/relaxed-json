@@ -297,9 +297,8 @@
     }
   }
 
-  function raiseUnexpected(state, token, expected) {
-    var message = "Unexpected token: " + strToken(token) + ", expected " + expected;
-    if (state.tolerant) {
+  function raiseError(state, token, message) {
+     if (state.tolerant) {
       state.warnings.push({
         message: message,
         line: token.line,
@@ -311,22 +310,15 @@
     }
   }
 
+  function raiseUnexpected(state, token, expected) {
+    raiseError(state, token, "Unexpected token: " + strToken(token) + ", expected " + expected);
+  }
+
   function checkDuplicates(state, obj, token) {
-    var message;
     var key = token.value;
 
     if (state.duplicate && Object.prototype.hasOwnProperty.call(obj, key)) {
-      message = "Duplicate key: " + key;
-      if (state.tolerant) {
-        state.warnings.push({
-          message: message,
-          line: token.line,
-        });
-      } else {
-        var err = new SyntaxError(message);
-        err.line = token.line;
-        throw err;
-      }
+      raiseError(state, token, "Duplicate key: " + key);
     }
   }
 
