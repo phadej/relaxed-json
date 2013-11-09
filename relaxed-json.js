@@ -311,7 +311,33 @@
     }
   }
 
-  function parsePair(tokens, state) {
+  function checkDuplicates(state, obj, token) {
+    var message;
+    var key = token.value;
+
+    if (state.duplicate && Object.prototype.hasOwnProperty.call(obj, key)) {
+      message = "Duplicate key: " + key;
+      if (state.tolerant) {
+        state.warnings.push({
+          message: message,
+          line: token.line,
+        });
+      } else {
+        var err = new SyntaxError(message);
+        err.line = token.line;
+        throw err;
+      }
+    }
+  }
+
+  function appendPair(state, obj, key, value) {
+    value = state.reviver ? state.reviver(key, value) : value;
+    if (value !== undefined) {
+      obj[key] = value;
+    }
+  }
+
+  function parsePair(tokens, state, obj) {
     var token = skipPunctuation(tokens, state, [":"]);
     var key, value;
 
@@ -341,30 +367,22 @@
       case "{":
         state.pos -= 1;
         value = parseAny(tokens, state);
-        return {
-          key: "null",
-          value: value,
-        };
+        appendPair(state, obj, "null", value);
+        return;
       }
     }
 
+    checkDuplicates(state, obj, token);
     key = token.value;
     skipColon(tokens, state);
     value = parseAny(tokens, state);
 
-    return {
-      key: key,
-      value: value,
-    };
+    appendPair(state, obj, key, value);
   }
 
   function parseObject(tokens, state) {
     var token = skipPunctuation(tokens, state, [":", "}"]);
     var obj = {};
-    var key, value;
-    var pair;
-    var err;
-    var message;
 
     if (token.type === "eof") {
       raiseUnexpected(state, token, "'}' or string");
@@ -381,11 +399,7 @@
 
     default:
       state.pos -= 1; // push the token back
-      pair = parsePair(tokens, state);
-      value = state.reviver ? state.reviver(pair.key, pair.value) : pair.value;
-      if (value !== undefined) {
-        obj[pair.key] = value;
-      }
+      parsePair(tokens, state, obj);
       break;
     }
 
@@ -409,28 +423,7 @@
         return obj;
 
       case ",":
-        pair = parsePair(tokens, state);
-
-        key = pair.key;
-
-        if (state.duplicate && Object.prototype.hasOwnProperty.call(obj, key)) {
-          message = "Duplicate key: " + key;
-          if (state.tolerant) {
-            state.warnings.push({
-              message: message,
-              line: token.line,
-            });
-          } else {
-            err = new SyntaxError(message);
-            err.line = token.line;
-            throw err;
-          }
-        }
-
-        value = state.reviver ? state.reviver(pair.key, pair.value) : pair.value;
-        if (value !== undefined) {
-          obj[pair.key] = value;
-        }
+        parsePair(tokens, state, obj);
         break;
       }
     }
