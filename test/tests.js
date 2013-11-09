@@ -75,6 +75,11 @@ describe("transform()", function () {
     it("strips multi-line comments", function () {
       relaxation("[ true,  /* comment \n  */ false]", [true, false]);
     });
+
+    it("transforms number keys into string keys", function () {
+      relaxation("{ 1: true }", { "1": true });
+      relaxation("{ 1e3: 1e3 }", { "1e3": 1000 });
+    });
   });
 
   describe("error cases", function () {
@@ -306,12 +311,6 @@ describe("parse() with opts { warnings: true } ", function () {
     it("throws if tokens at the end", function () {
       assert.throws(function () {
         parse("{}{");
-      });
-    });
-
-    it("throws if not string after {", function () {
-      assert.throws(function () {
-        parse("{ 1: true }");
       });
     });
 

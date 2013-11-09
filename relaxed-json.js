@@ -193,7 +193,7 @@
     }
   }
 
-  function stripTrailingComma(tokens) {
+  function transformTrailingComma(tokens) {
     var res = [];
 
     tokens.forEach(function (token, index) {
@@ -207,9 +207,33 @@
             res[commaI] = {
               type: " ",
               match: " ",
-              line: tokens[commaI].line,
+              line: res[commaI].line,
             };
           }
+        }
+      }
+
+      res.push(token);
+    });
+
+    return res;
+  }
+
+  function transformNumberKeys(tokens) {
+    var res = [];
+
+    tokens.forEach(function (token, index) {
+      if (token.type === ":") {
+        var prevI = previousNWSToken(res, index - 1);
+
+        if (prevI && res[prevI].type === "number") {
+          var numToken = res[prevI];
+          res[prevI] = {
+            type: "string",
+            match: "\"" + numToken.match + "\"",
+            line: numToken.line,
+            value: "" + numToken.value,
+          };
         }
       }
 
@@ -224,7 +248,10 @@
     var tokens = lexer(text);
 
     // remove trailing commas
-    tokens = stripTrailingComma(tokens);
+    tokens = transformTrailingComma(tokens);
+
+    // transform number keys
+    tokens = transformNumberKeys(tokens);
 
     // concat stuff
     return tokens.reduce(function (str, token) {
@@ -517,7 +544,9 @@
 
     if (opts.relaxed) {
       // Strip commas
-      tokens = stripTrailingComma(tokens);
+      tokens = transformTrailingComma(tokens);
+      // transform number keys
+      tokens = transformNumberKeys(tokens);
     }
 
     if (opts.warnings) {
