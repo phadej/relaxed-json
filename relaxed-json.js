@@ -537,10 +537,33 @@
     }
   }
 
+  function stringifyPair(obj, key) {
+    return JSON.stringify(key) + ":" + stringify(obj[key]);
+  }
+
+  function stringify(obj) {
+    switch (typeof obj) {
+      case "string":
+      case "number":
+      case "boolean":
+        return JSON.stringify(obj);
+    }
+    if (Array.isArray(obj)) {
+      return "[" + obj.map(stringify).join(",") + "]";
+    }
+    if (new Object(obj) === obj) {
+      var keys = Object.keys(obj);
+      keys.sort();
+      return "{" + keys.map(stringifyPair.bind(null, obj)) + "}";
+    }
+    return "null";
+  }
+
   // Export  stuff
   var RJSON = {
     transform: transform,
     parse: parse,
+    stringify: stringify,
   };
 
   /* global window, module */

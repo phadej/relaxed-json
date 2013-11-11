@@ -390,3 +390,14 @@ describe("parse() with opts { warnings: true } ", function () {
     errorCases(JSON.parse);
   });
 });
+
+describe("stringify", function () {
+  it("works", function () {
+    var property = jsc.forall(jsc.value(), function (x) {
+      var y = JSON.parse(rjson.stringify(x));
+      return _.isEqual(x, y);
+    });
+
+    jsc.assert(property, jscOpts);
+  });
+});
