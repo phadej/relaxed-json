@@ -1,7 +1,7 @@
 {
   "name": "relaxed-json",
   "description": "Relaxed JSON is strict superset JSON, relaxing strictness of valilla JSON",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "homepage": "https://github.com/phadej/relaxed-json",
   "author": {
     "name": "Oleg Grenrus",

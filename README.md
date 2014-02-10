@@ -36,6 +36,9 @@ features helping writing JSON by hand.
 
 ## Changelog
 
+- 0.2.3 Bugfixes
+  - `$` is valid identifier character
+  - single line comments may end with `CR` and `CRLF` also
 - 0.2.2 Bugfix
 - 0.2.1 Code reogranization
   - More though into toleration, handles valid json without colons and commas
