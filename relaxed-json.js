@@ -173,7 +173,7 @@
     if (relaxed) {
       ret = ret.concat([
         { re: /^'(([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
-        { re: /^\/\/.*?\n/, f: fComment },
+        { re: /^\/\/.*?(?:\r\n|\r|\n)/, f: fComment },
         { re: /^\/\*[\s\S]*?\*\//, f: fComment },
         { re: /^[$a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
       ]);
