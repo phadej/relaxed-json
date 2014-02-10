@@ -175,7 +175,7 @@
         { re: /^'(([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
         { re: /^\/\/.*?\n/, f: fComment },
         { re: /^\/\*[\s\S]*?\*\//, f: fComment },
-        { re: /^[a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
+        { re: /^[$a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
       ]);
     }
 
