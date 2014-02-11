@@ -85,13 +85,13 @@
 
   function fStringSingle(m) {
     // String in single quotes
-    var content = m[1].replace(/([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})/g, function (m) {
-      if (m === "\"") {
+    var content = m[1].replace(/([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})/g, function (mm) {
+      if (mm === "\"") {
         return "\\\"";
-      } else if (m === "\\'") {
+      } else if (mm === "\\'") {
         return "'";
       } else {
-        return m;
+        return mm;
       }
     });
 
