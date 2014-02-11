@@ -29,12 +29,12 @@
     "test": "grunt"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-jshint": "~0.8.0",
     "grunt": "~0.4.1",
-    "grunt-contrib-uglify": "~0.2.5",
+    "grunt-contrib-uglify": "~0.3.2",
     "grunt-simple-mocha": "~0.4.0",
     "jsverify": "~0.1.2",
-    "underscore": "~1.5.2"
+    "underscore": "~1.6.0"
   },
   "keywords": [
     "json",
