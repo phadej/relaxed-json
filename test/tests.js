@@ -234,7 +234,7 @@ describe("parse() with opts { warnings: true } ", function () {
     it("terminates always", function () {
       var token = {
         arbitrary: function (size) {
-          size = jsc._.getRandomInt(0, 8);
+          size = jsc._.random(0, 8);
           switch (size) {
             case 0: return "[";
             case 1: return "]";
