@@ -1,0 +1,15 @@
+.jshintrc
+.travis.yml
+.npmignore
+
+Gruntfile.js
+
+example.js
+example.rjson
+
+relaxed-json.min.js
+relaxed-json.min.js.map
+
+coverage/
+test/
+bower_components/
