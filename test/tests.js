@@ -400,4 +400,12 @@ describe("stringify", function () {
 
     jsc.assert(property, jscOpts);
   });
+
+  it("stringifies null as null", function () {
+    assert.equal(rjson.stringify(null), "null");
+  });
+
+  it("XXX: stringifies undefined as null", function () {
+    assert.equal(rjson.stringify(undefined), "null");
+  });
 });
