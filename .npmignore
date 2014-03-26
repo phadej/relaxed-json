@@ -2,7 +2,7 @@
 .travis.yml
 .npmignore
 
-Gruntfile.js
+Makefile
 
 example.js
 example.rjson
@@ -10,6 +10,7 @@ example.rjson
 relaxed-json.min.js
 relaxed-json.min.js.map
 
+example/
 coverage/
 test/
 bower_components/
