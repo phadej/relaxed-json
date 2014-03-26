@@ -27,10 +27,13 @@
 (function () {
   "use strict";
 
-  // slightly different from ES5 some, without cast to boolean
-  // [x, y, z].some(f):
-  // ES5:  !! ( f(x) || f(y) || f(z) || false)
-  // this:    ( f(x) || f(y) || f(z) || false)
+  /*
+    slightly different from ES5 some, without cast to boolean
+    [x, y, z].some(f):
+    ES5:  !! ( f(x) || f(y) || f(z) || false)
+    this:    ( f(x) || f(y) || f(z) || false)
+  */
+  // :: array -> fn -> *
   function some(array, f) {
     var acc = false;
     for (var i = 0; i < array.length; i++) {
@@ -42,11 +45,20 @@
     return acc;
   }
 
+  // typify: type tokenSpec = { re: regexp, f : fn }
+  // typify: type tokenType = "atom" | "number" | "string" | "[" | "]" | "{" | "}" | ":" | "," | " " | "eof"
+  // typify: type rawToken = { type: tokenType, match: string, value: any }
+  // typify: type token = rawToken & { line: nat }
+  // typify: type parseToken = { type: tokenType, value: any, line: nat }
+
+  // :: array tokenSpec -> fn
   function makeLexer(tokenSpecs) {
+    // :: string -> array token
     return function (contents) {
       var tokens = [];
       var line = 1;
 
+      // :: -> { raw: string, matched: * } | null
       function findToken() {
         return some(tokenSpecs, function (tokenSpec) {
           var m = tokenSpec.re.exec(contents);
@@ -55,7 +67,7 @@
             contents = contents.slice(raw.length);
             return {
               raw: raw,
-              matched: tokenSpec.f(m, line),
+              matched: tokenSpec.f(m),
             };
           } else {
             return undefined;
@@ -85,6 +97,7 @@
     };
   }
 
+  // :: tuple string string -> rawToken
   function fStringSingle(m) {
     // String in single quotes
     var content = m[1].replace(/([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})/g, function (mm) {
@@ -104,6 +117,7 @@
     };
   }
 
+  // :: tuple string -> rawToken
   function fStringDouble(m) {
     return {
       type: "string",
@@ -112,6 +126,7 @@
     };
   }
 
+  // :: tuple string -> rawToken
   function fIdentifier(m) {
     // identifiers are transformed into strings
     return {
@@ -123,6 +138,7 @@
     };
   }
 
+  // :: tuple string -> rawToken
   function fComment(m) {
     // comments are whitespace, leave only linefeeds
     return {
@@ -133,6 +149,7 @@
     };
   }
 
+  // :: tuple string -> rawToken
   function fNumber(m) {
     return {
       type: "number",
@@ -141,9 +158,10 @@
     };
   }
 
+  // :: tuple ("null" | "true" | "false") -> rawToken
   function fKeyword(m) {
     var value;
-    switch (m[1]) {
+    switch (m[0]) {
       case "null": value = null; break;
       case "true": value = true; break;
       case "false": value = false; break;
@@ -156,8 +174,11 @@
     };
   }
 
+  // :: boolean -> array tokenSpec
   function makeTokenSpecs(relaxed) {
+    // :: string -> fn
     function f(type) {
+      // :: tuple string -> rawToken
       return function (m) {
         return { type: type, match: m[0] };
       };
@@ -171,15 +192,15 @@
       { re: /^\]/, f: f("]") },
       { re: /^,/, f: f(",") },
       { re: /^:/, f: f(":") },
-      { re: /^(true|false|null)/, f: fKeyword },
-      { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: fNumber },
-      { re: /^"([^"\\]|\\["bnrtf\\\/]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
+      { re: /^(?:true|false|null)/, f: fKeyword },
+      { re: /^\-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/, f: fNumber },
+      { re: /^"(?:[^"\\]|\\["bnrtf\\\/]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
     ];
 
     // additional stuff
     if (relaxed) {
       ret = ret.concat([
-        { re: /^'(([^'\\]|\\['bnrtf\\\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
+        { re: /^'((?:[^'\\]|\\['bnrtf\\\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
         { re: /^\/\/.*?(?:\r\n|\r|\n)/, f: fComment },
         { re: /^\/\*[\s\S]*?\*\//, f: fComment },
         { re: /^[$a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },
@@ -192,6 +213,7 @@
   var lexer = makeLexer(makeTokenSpecs(true));
   var strictLexer = makeLexer(makeTokenSpecs(false));
 
+  // :: array token -> nat -> nat?
   function previousNWSToken(tokens, index) {
     for (; index >= 0; index--) {
       if (tokens[index].type !== " ") {
@@ -201,20 +223,22 @@
     return undefined;
   }
 
+  // :: array token -> array token
   function stripTrailingComma(tokens) {
     var res = [];
 
     tokens.forEach(function (token, index) {
-      if (token.type === "]" || token.type === "}") {
+      if (index > 0 && (token.type === "]" || token.type === "}")) {
         // go backwards as long as there is whitespace, until first comma
         var commaI = previousNWSToken(res, index - 1);
 
-        if (commaI && res[commaI].type === ",") {
+        if (commaI !== undefined && commaI > 0 && res[commaI].type === ",") {
           var preCommaI = previousNWSToken(res, commaI - 1);
-          if (preCommaI && res[preCommaI].type !== "[" && res[preCommaI].type !== "{") {
+          if (preCommaI !== undefined && res[preCommaI].type !== "[" && res[preCommaI].type !== "{") {
             res[commaI] = {
               type: " ",
               match: " ",
+              value: " ",
               line: tokens[commaI].line,
             };
           }
@@ -227,6 +251,7 @@
     return res;
   }
 
+  // :: string -> string
   function transform(text) {
     // Tokenize contents
     var tokens = lexer(text);
@@ -240,18 +265,22 @@
     }, "");
   }
 
+  // typify: type parseWarning = { message: string, line: nat }
+  // typify: type parseState = { pos : nat, warnings: array parseWarning }
+  // :: array parseToken -> parseState -> *
   function popToken(tokens, state) {
     var token = tokens[state.pos];
     state.pos += 1;
 
     if (!token) {
       var line = tokens.length !== 0 ? tokens[tokens.length - 1].line : 1;
-      return { type: "eof", line: line };
+      return { type: "eof", match: "", line: line }; // XXX: match should be value
     }
 
     return token;
   }
 
+  // :: token -> string
   function strToken(token) {
     switch (token.type) {
       case "atom":
@@ -265,6 +294,7 @@
     }
   }
 
+  // :: array token -> parseState -> undefined
   function skipColon(tokens, state) {
     var colon = popToken(tokens, state);
     if (colon.type !== ":") {
@@ -284,6 +314,7 @@
     }
   }
 
+  // :: array token -> parseState -> (array string)? -> token
   function skipPunctuation(tokens, state, valid) {
     var punctuation = [",", ":", "]", "}"];
     var token = popToken(tokens, state);
@@ -311,6 +342,7 @@
     }
   }
 
+  // :: parseState -> token -> string -> undefined
   function raiseError(state, token, message) {
     if (state.tolerant) {
       state.warnings.push({
@@ -324,10 +356,12 @@
     }
   }
 
+  // :: parseState -> token -> string -> undefined
   function raiseUnexpected(state, token, expected) {
     raiseError(state, token, "Unexpected token: " + strToken(token) + ", expected " + expected);
   }
 
+  // :: parseState -> {} -> parseToken -> undefined
   function checkDuplicates(state, obj, token) {
     var key = token.value;
 
@@ -336,6 +370,8 @@
     }
   }
 
+  // XXX: too loosy signature
+  // :: parseState -> any -> any -> any -> undefined
   function appendPair(state, obj, key, value) {
     value = state.reviver ? state.reviver(key, value) : value;
     if (value !== undefined) {
@@ -343,6 +379,7 @@
     }
   }
 
+  // :: array parseToken -> parseState -> map -> undefined
   function parsePair(tokens, state, obj) {
     var token = skipPunctuation(tokens, state, [":"]);
     var key;
@@ -388,12 +425,14 @@
     appendPair(state, obj, key, value);
   }
 
+  // :: array parseToken -> parseState -> array -> undefined
   function parseElement(tokens, state, arr) {
     var key = arr.length;
     var value = parseAny(tokens, state); // eslint-disable-line no-use-before-define
     arr[key] = state.reviver ? state.reviver("" + key, value) : value;
   }
 
+  // :: array parseToken -> parseState -> {}
   function parseObject(tokens, state) {
     return parseMany(tokens, state, {}, { // eslint-disable-line no-use-before-define
       skip: [":", "}"],
@@ -403,6 +442,7 @@
     });
   }
 
+  // :: array parseToken -> parseState -> array
   function parseArray(tokens, state) {
     return parseMany(tokens, state, [], { // eslint-disable-line no-use-before-define
       skip: ["]"],
@@ -412,6 +452,8 @@
     });
   }
 
+  // typify: type parseManyOpts = { skip: array tokenType, elementParser: fn, elementName: string, endSymbol: tokenType }
+  // :: t : array | {} => array parseToken -> parseState -> t -> parseManyOpts -> t
   function parseMany(tokens, state, obj, opts) {
     var token = skipPunctuation(tokens, state, opts.skip);
 
@@ -461,6 +503,7 @@
     }
   }
 
+  // :: array parseToken -> parseState -> any -> undefined
   function endChecks(tokens, state, ret) {
     if (state.pos < tokens.length) {
       raiseError(state, tokens[state.pos],
@@ -478,6 +521,7 @@
     }
   }
 
+  // :: array parseToken -> parseState -> boolean? -> any
   function parseAny(tokens, state, end) {
     var token = skipPunctuation(tokens, state);
     var ret;
@@ -509,6 +553,7 @@
     return ret;
   }
 
+  // :: string -> * -> any
   function parse(text, opts) {
     if (typeof opts === "function" || opts === undefined) {
       return JSON.parse(transform(text), opts);
@@ -549,10 +594,12 @@
     }
   }
 
+  // :: any -> string -> ... -> string
   function stringifyPair(obj, key) {
     return JSON.stringify(key) + ":" + stringify(obj[key]); // eslint-disable-line no-use-before-define
   }
 
+  // :: any -> ... -> string
   function stringify(obj) {
     switch (typeof obj) {
       case "string":

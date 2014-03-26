@@ -14,7 +14,7 @@ TYPIFY=$(BINDIR)/typify
 
 SRC=relaxed-json.js bin/rjson.js
 
-test : eslint mocha istanbul david
+test : eslint mocha istanbul david typify
 
 eslint :
 	$(ESLINT) $(SRC)
