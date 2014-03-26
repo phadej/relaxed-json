@@ -26,15 +26,15 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "grunt"
+    "test": "make"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt": "~0.4.1",
-    "grunt-contrib-uglify": "~0.3.2",
-    "grunt-simple-mocha": "~0.4.0",
     "jsverify": "~0.2.0",
-    "underscore": "~1.6.0"
+    "underscore": "~1.6.0",
+    "mocha": "~1.18.2",
+    "jshint": "~2.4.4",
+    "istanbul": "~0.2.6",
+    "uglify-js": "~2.4.13"
   },
   "keywords": [
     "json",
