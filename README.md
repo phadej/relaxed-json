@@ -1,9 +1,9 @@
 # Relaxed JSON
 
-[![Build Status](https://secure.travis-ci.org/phadej/relaxed-json.png?branch=master)](http://travis-ci.org/phadej/relaxed-json)
-[![NPM version](https://badge.fury.io/js/relaxed-json.png)](http://badge.fury.io/js/relaxed-json)
-[![Dependency Status](https://gemnasium.com/phadej/relaxed-json.png)](https://gemnasium.com/phadej/relaxed-json)
-[![Code Climate](https://codeclimate.com/github/phadej/relaxed-json.png)](https://codeclimate.com/github/phadej/relaxed-json)
+[![Build Status](https://secure.travis-ci.org/phadej/relaxed-json.svg?branch=master)](http://travis-ci.org/phadej/relaxed-json)
+[![NPM version](https://badge.fury.io/js/relaxed-json.svg)](http://badge.fury.io/js/relaxed-json)
+[![Dependency Status](https://gemnasium.com/phadej/relaxed-json.svg)](https://gemnasium.com/phadej/relaxed-json)
+[![Code Climate](https://img.shields.io/codeclimate/github/phadej/relaxed-json.svg))](https://codeclimate.com/github/phadej/relaxed-json)
 
 Are you frustrated that you cannot add comments into your configuration JSON
 Relaxed JSON is a simple solution.
