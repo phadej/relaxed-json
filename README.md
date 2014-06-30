@@ -36,6 +36,7 @@ features helping writing JSON by hand.
 
 ## Changelog
 
+- 0.2.6 Dependencies update
 - 0.2.5 Use `make`
 - 0.2.4 Maintenance release
 - 0.2.3 Bugfixes
