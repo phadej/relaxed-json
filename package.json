@@ -31,8 +31,8 @@
   "devDependencies": {
     "jsverify": "~0.2.0",
     "underscore": "~1.6.0",
-    "mocha": "~1.18.2",
-    "jshint": "~2.4.4",
+    "mocha": "~1.20.1",
+    "jshint": "~2.5.1",
     "istanbul": "~0.2.6",
     "uglify-js": "~2.4.13"
   },
