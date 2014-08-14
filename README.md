@@ -54,6 +54,9 @@ Error on line 27: Unexpected character: (
 
 ## Changelog
 
+- 0.2.7 `rjson` executable
+  - also depedencies update
+  - jscs style check
 - 0.2.6 Dependencies update
 - 0.2.5 Use `make`
 - 0.2.4 Maintenance release
