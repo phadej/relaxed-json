@@ -12,7 +12,7 @@ UGLIFY=$(BINDIR)/uglifyjs
 test : jshint mocha istanbul
 
 jshint :
-	$(JSHINT) relaxed-json.js
+	$(JSHINT) relaxed-json.js bin/rjson.js
 
 mocha : 
 	$(MOCHA) --reporter=spec test

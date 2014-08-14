@@ -34,6 +34,24 @@ features helping writing JSON by hand.
   - `warnings`: use relaxed JSON own parser, supports better error messages (default: false).
   - `duplicate`: fail if there are duplicate keys in objects
 
+## Executable
+
+There is `rjson` executable<sup>&dagger;</sup>
+
+```sh
+$ sudo npm install -g relaxed-json
+
+$ rjson relaxed-json.js
+Error on line 27: Unexpected character: (
+(function () {
+
+% rjson package.json   
+{
+  "name": "relaxed-json",
+  "description": "Relaxed JSON is strict superset JSON, relaxing strictness of valilla JSON",
+
+<sup>&dagger;</sup>`rjson` is similar to `python -mjson.tool`.
+
 ## Changelog
 
 - 0.2.6 Dependencies update
