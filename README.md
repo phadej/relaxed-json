@@ -71,3 +71,7 @@ Error on line 27: Unexpected character: (
   - test suite (!)
 - 0.1.1 RJSON.parse
 - 0.1.0 Initial release
+
+## Related projects
+
+- [strip-json-comments](https://www.npmjs.org/package/strip-json-comments)
