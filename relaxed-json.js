@@ -116,8 +116,9 @@
       type: "string",
       value: m[0],
       match: "\"" + m[0].replace(/./g, function (c) {
-      return c === "\\" ? "\\\\" : c;
-    }) + "\"" };
+        return c === "\\" ? "\\\\" : c;
+      }) + "\"",
+    };
   }
 
   function fComment(m) {
@@ -151,7 +152,7 @@
 
   function tokenSpecs(relaxed) {
     function f(type) {
-      return function(m) {
+      return function (m) {
         return { type: type, match: m[0] };
       };
     }
@@ -304,7 +305,7 @@
   }
 
   function raiseError(state, token, message) {
-     if (state.tolerant) {
+    if (state.tolerant) {
       state.warnings.push({
         message: message,
         line: token.line,
@@ -356,7 +357,7 @@
       case "atom":
         token = {
           type: "string",
-          value: ""+token.value,
+          value: "" + token.value,
           line: token.line,
         };
         break;
@@ -407,7 +408,7 @@
 
     if (token.type === "eof") {
       raiseUnexpected(state, token, "'" + opts.endSymbol + "' or " + opts.elementName);
-      
+
       token = {
         type: opts.endSymbol,
         line: token.line,

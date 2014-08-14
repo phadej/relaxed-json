@@ -37,7 +37,8 @@
     "mocha": "~1.21.4",
     "jshint": "~2.5.1",
     "istanbul": "~0.3.0",
-    "uglify-js": "~2.4.13"
+    "uglify-js": "~2.4.13",
+    "jscs": "~1.5.9"
   },
   "keywords": [
     "json",

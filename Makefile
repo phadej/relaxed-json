@@ -8,11 +8,17 @@ MOCHA=$(BINDIR)/_mocha
 ISTANBUL=$(BINDIR)/istanbul
 JSHINT=$(BINDIR)/jshint
 UGLIFY=$(BINDIR)/uglifyjs
+JSCS=$(BINDIR)/jscs
 
-test : jshint mocha istanbul
+SRC=relaxed-json.js bin/rjson.js
+
+test : jshint jscs mocha istanbul
 
 jshint :
-	$(JSHINT) relaxed-json.js bin/rjson.js
+	$(JSHINT) 
+
+jscs :
+	$(JSCS) $(SRC)
 
 mocha : 
 	$(MOCHA) --reporter=spec test

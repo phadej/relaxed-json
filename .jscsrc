@@ -1,0 +1,38 @@
+{
+    "preset": "google",
+    "fileExtensions": "jscs",
+
+    "requireParenthesesAroundIIFE": true,
+    "maximumLineLength": 300,
+    "validateIndentation": 2,
+    "validateQuoteMarks": {
+    	"escape": true,
+    	"mark": "\""
+    },
+
+    "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
+
+    "disallowKeywords": ["with"],
+    "disallowSpacesInsideObjectBrackets": null,
+
+    "requireSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true,
+        "beforeOpeningCurlyBrace": true
+    },
+
+    "requireSpacesInNamedFunctionExpression": {
+        "beforeOpeningCurlyBrace": true
+    },
+
+    "disallowSpacesInNamedFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+
+    "requireSpacesInFunctionDeclaration": {
+        "beforeOpeningCurlyBrace": true
+    },
+
+    "disallowSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true
+    }
+}
