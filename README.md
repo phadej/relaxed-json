@@ -49,6 +49,7 @@ Error on line 27: Unexpected character: (
 {
   "name": "relaxed-json",
   "description": "Relaxed JSON is strict superset JSON, relaxing strictness of valilla JSON",
+```
 
 <sup>&dagger;</sup>`rjson` is similar to `python -mjson.tool`.
 
