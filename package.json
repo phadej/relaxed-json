@@ -22,6 +22,9 @@
     }
   ],
   "main": "relaxed-json.js",
+  "bin": {
+    "rjson": "./bin/rjson.js"
+  },
   "engines": {
     "node": ">= 0.10.0"
   },
@@ -41,5 +44,9 @@
     "comments",
     "comment",
     "config"
-  ]
+  ],
+  "dependencies": {
+    "commander": "~2.3.0",
+    "chalk": "~0.5.1"
+  }
 }
