@@ -130,7 +130,7 @@
 
   function fNumber(m) {
     return {
-      type : "number",
+      type: "number",
       match: m[0],
       value: parseFloat(m[0]),
     };
@@ -348,7 +348,7 @@
         token = {
           type: "string",
           value: "null",
-          line:  token.line,
+          line: token.line,
         };
 
         state.pos -= 1;

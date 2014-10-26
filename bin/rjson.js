@@ -45,4 +45,6 @@ function cli(argv) {
 }
 
 var ret = cli(process.argv);
+/* eslint-disable no-process-exit */
 process.exit(ret);
+/* eslint-enable no-process-exit */

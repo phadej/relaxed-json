@@ -1,21 +1,25 @@
 all : test
 
-.PHONY : all test jshint mocha istanbul dist
+.PHONY : all test jshint eslint mocha istanbul dist
 
 BINDIR=node_modules/.bin/
 
 MOCHA=$(BINDIR)/_mocha
 ISTANBUL=$(BINDIR)/istanbul
 JSHINT=$(BINDIR)/jshint
+ESLINT=$(BINDIR)/eslint
 UGLIFY=$(BINDIR)/uglifyjs
 JSCS=$(BINDIR)/jscs
 
 SRC=relaxed-json.js bin/rjson.js
 
-test : jshint jscs mocha istanbul
+test : jshint eslint jscs mocha istanbul
 
 jshint :
-	$(JSHINT) 
+	$(JSHINT) $(SRC)
+
+eslint :
+	$(ESLINT) $(SRC)
 
 jscs :
 	$(JSCS) $(SRC)
