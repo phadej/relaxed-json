@@ -20,7 +20,7 @@ describe("transform()", function () {
   });
 
   it("should not change any valid json", function () {
-    var property = jsc.forall(jsc.value(), function (x) {
+    var property = jsc.forall(jsc.json, function (x) {
       var t = JSON.stringify(x);
       try {
         return t === rjson.transform(t);
@@ -34,7 +34,7 @@ describe("transform()", function () {
   });
 
   it("should not change any valid json, whitespaces", function () {
-    var property = jsc.forall(jsc.value(), function (x) {
+    var property = jsc.forall(jsc.json, function (x) {
       var t = JSON.stringify(x, null, 2);
       return t === rjson.transform(t);
     });
@@ -88,7 +88,7 @@ describe("transform()", function () {
 
 describe("parse()", function () {
   it("should parse everything JSON.parse does", function () {
-    var property = jsc.forall(jsc.value(), function (x) {
+    var property = jsc.forall(jsc.json, function (x) {
       var t = JSON.stringify(x, null, 2);
       return _.isEqual(rjson.parse(t), JSON.parse(t));
     });
@@ -99,7 +99,7 @@ describe("parse()", function () {
 
 describe("parse() with opts { warnings: true } ", function () {
   it("should parse everything JSON.parse does", function () {
-    var property = jsc.forall(jsc.value(), function (x) {
+    var property = jsc.forall(jsc.json, function (x) {
       var t = JSON.stringify(x, null, 2);
       return _.isEqual(rjson.parse(t, { warnings: true }), JSON.parse(t));
     });
@@ -108,7 +108,7 @@ describe("parse() with opts { warnings: true } ", function () {
   });
 
   it("calls reviver as JSON.parse does", function () {
-    var property = jsc.forall(jsc.value(), function (x) {
+    var property = jsc.forall(jsc.json, function (x) {
       var t = JSON.stringify(x, null, 2);
       var rjsonCalls = [];
       var jsonCalls = [];
@@ -213,7 +213,7 @@ describe("parse() with opts { warnings: true } ", function () {
         }
       }
 
-      var jsonNoCommaColon = jsc.suchthat(jsc.value(), noCommaColon) ;
+      var jsonNoCommaColon = jsc.suchthat(jsc.json, noCommaColon) ;
 
       var property = jsc.forall(jsonNoCommaColon, function (x) {
         var t = JSON.stringify(x, null, 2).replace(/[,:]/g, " ");
@@ -233,8 +233,8 @@ describe("parse() with opts { warnings: true } ", function () {
 
     it("terminates always", function () {
       var token = {
-        arbitrary: function (size) {
-          size = jsc._.random(0, 8);
+        generator: function (size) {
+          size = jsc.random(0, 8);
           switch (size) {
             case 0: return "[";
             case 1: return "]";
@@ -242,9 +242,9 @@ describe("parse() with opts { warnings: true } ", function () {
             case 3: return "}";
             case 4: return ",";
             case 5: return ":";
-            case 6: return "\"" + jsc.string().arbitrary(size).replace(/["\\]/g, "") + "\"";
-            case 7: return jsc.integer().arbitrary(size);
-            case 8: return jsc.oneof([null, true, false]).arbitrary();
+            case 6: return "\"" + jsc.string().generator(size).replace(/["\\]/g, "") + "\"";
+            case 7: return jsc.integer().generator(size);
+            case 8: return jsc.elements([null, true, false]).generator();
           }
         },
         shrink: function () { return []; },
@@ -393,7 +393,7 @@ describe("parse() with opts { warnings: true } ", function () {
 
 describe("stringify", function () {
   it("works", function () {
-    var property = jsc.forall(jsc.value(), function (x) {
+    var property = jsc.forall(jsc.json, function (x) {
       var y = JSON.parse(rjson.stringify(x));
       return _.isEqual(x, y);
     });

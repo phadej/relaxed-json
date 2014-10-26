@@ -32,13 +32,13 @@
     "test": "make"
   },
   "devDependencies": {
-    "jsverify": "~0.3.3",
+    "jsverify": "~0.4.0-beta.2",
     "underscore": "~1.6.0",
-    "mocha": "~1.21.4",
+    "mocha": "~2.0.1",
     "jshint": "~2.5.1",
     "istanbul": "~0.3.0",
     "uglify-js": "~2.4.13",
-    "jscs": "~1.5.9"
+    "jscs": "~1.7.3"
   },
   "keywords": [
     "json",
@@ -47,7 +47,7 @@
     "config"
   ],
   "dependencies": {
-    "commander": "~2.3.0",
+    "commander": "~2.5.0",
     "chalk": "~0.5.1"
   }
 }

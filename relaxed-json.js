@@ -338,7 +338,8 @@
 
   function parsePair(tokens, state, obj) {
     var token = skipPunctuation(tokens, state, [":"]);
-    var key, value;
+    var key;
+    var value;
 
     if (token.type !== "string") {
       raiseUnexpected(state, token, "string");
