@@ -55,6 +55,7 @@ Error on line 27: Unexpected character: (
 
 ## Changelog
 
+- 0.2.9 Dependencies bump
 - 0.2.8 Dev dependencies update
 - 0.2.7 `rjson` executable
   - also depedencies update

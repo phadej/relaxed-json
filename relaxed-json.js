@@ -150,7 +150,7 @@
     };
   }
 
-  function tokenSpecs(relaxed) {
+  function makeTokenSpecs(relaxed) {
     function f(type) {
       return function (m) {
         return { type: type, match: m[0] };
@@ -183,8 +183,8 @@
     return ret;
   }
 
-  var lexer = makeLexer(tokenSpecs(true));
-  var strictLexer = makeLexer(tokenSpecs(false));
+  var lexer = makeLexer(makeTokenSpecs(true));
+  var strictLexer = makeLexer(makeTokenSpecs(false));
 
   function previousNWSToken(tokens, index) {
     for (; index >= 0; index--) {
