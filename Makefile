@@ -4,7 +4,8 @@ all : test
 
 BINDIR=node_modules/.bin
 
-MOCHA=$(BINDIR)/_mocha
+MOCHA=$(BINDIR)/mocha
+IMOCHA=$(BINDIR)/_mocha
 ISTANBUL=$(BINDIR)/istanbul
 JSHINT=$(BINDIR)/jshint
 ESLINT=$(BINDIR)/eslint
@@ -29,7 +30,7 @@ mocha :
 	$(MOCHA) --reporter=spec test
 
 istanbul :
-	$(ISTANBUL) cover $(MOCHA) test
+	$(ISTANBUL) cover $(IMOCHA) test
 	$(ISTANBUL) check-coverage --statements -1 --branches -2 --functions 100 --lines -1
 
 uglify : relaxed-json.js
