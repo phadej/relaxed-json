@@ -33,11 +33,11 @@
   },
   "devDependencies": {
     "david": "^6.1.4",
-    "eslint": "^0.15.0",
+    "eslint": "^0.17.1",
     "istanbul": "~0.3.0",
     "jscs": "^1.11.3",
     "jshint": "^2.6.0",
-    "jsverify": "^0.5.1",
+    "jsverify": "^0.6.0-alpha.1",
     "mocha": "^2.1.0",
     "uglify-js": "~2.4.13",
     "underscore": "^1.8.2"

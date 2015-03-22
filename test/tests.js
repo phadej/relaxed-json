@@ -233,21 +233,22 @@ describe("parse() with opts { warnings: true } ", function () {
 
     it("terminates always", function () {
       var token = {
-        generator: function (size) {
-          size = jsc.random(0, 8);
-          switch (size) {
+        generator: jsc.generator.bless(function (size) {
+          switch (jsc.random(0, 8)) {
             case 0: return "[";
             case 1: return "]";
             case 2: return "{";
             case 3: return "}";
             case 4: return ",";
             case 5: return ":";
-            case 6: return "\"" + jsc.string().generator(size).replace(/["\\]/g, "") + "\"";
-            case 7: return jsc.integer().generator(size);
+            case 6: return "\"" + jsc.string.generator(size).replace(/["\\]/g, "") + "\"";
+            case 7: return jsc.integer.generator(size);
             case 8: return jsc.elements([null, true, false]).generator();
           }
-        },
-        shrink: function () { return []; },
+        }),
+        shrink: jsc.shrink.noop,
+        show: jsc.show.def,
+        smap: jsc.nat.smap
       };
 
       var property = jsc.forall(jsc.array(token), function (l) {
