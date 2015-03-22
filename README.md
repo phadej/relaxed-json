@@ -11,7 +11,7 @@ Small JavaScript library with only one exposed function `RJSON.transform(text : 
 (and few convenient helpers).
 
 [Relaxed JSON](http://oleg.fi/relaxed-json) (modified BSD license) is a strict superset of JSON,
-relaxing strictness of valilla JSON.
+relaxing strictness of vanilla JSON.
 Valid, vanilla JSON will not be changed by `RJSON.transform`. But there are few additional
 features helping writing JSON by hand.
 
