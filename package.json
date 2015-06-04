@@ -15,12 +15,7 @@
   "bugs": {
     "url": "https://github.com/phadej/relaxed-json/issues"
   },
-  "licenses": [
-    {
-      "type": "BSD3",
-      "url": "https://github.com/phadej/relaxed-json/blob/master/LICENSE"
-    }
-  ],
+  "license": "BSD-3-Clause",
   "main": "relaxed-json.js",
   "bin": {
     "rjson": "./bin/rjson.js"
