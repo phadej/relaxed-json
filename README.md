@@ -55,6 +55,8 @@ Error on line 27: Unexpected character: (
 
 ## Changelog
 
+- 1.0.0 &mdash; 2015-07-13 &mdash; Stable release
+  - Forward slashes bug fixed
 - 0.2.9 Dependencies bump
 - 0.2.8 Dev dependencies update
 - 0.2.7 `rjson` executable
@@ -81,3 +83,7 @@ Error on line 27: Unexpected character: (
 ## Related projects
 
 - [strip-json-comments](https://www.npmjs.org/package/strip-json-comments)
+
+For truly human writable configuration consider using [YAML](http://yaml.org/).
+
+- [js-yaml](https://www.npmjs.com/package/js-yaml)
