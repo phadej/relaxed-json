@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "david": "^6.1.4",
-    "eslint": "^0.22.1",
+    "eslint": "^0.24.1",
     "istanbul": "~0.3.0",
     "jscs": "^1.11.3",
     "jshint": "^2.6.0",
