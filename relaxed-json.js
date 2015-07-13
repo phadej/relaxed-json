@@ -65,7 +65,7 @@
         var matched = findToken();
 
         if (!matched) {
-          var err = new SyntaxError("Unexpected character: " + contents[0]);
+          var err = new SyntaxError("Unexpected character: " + contents[0] + "; input: " + contents.substr(0, 100));
           err.line = line;
           throw err;
         }
@@ -167,13 +167,13 @@
       { re: /^:/, f: f(":") },
       { re: /^(true|false|null)/, f: fKeyword },
       { re: /^\-?\d+(\.\d+)?([eE][+-]?\d+)?/, f: fNumber },
-      { re: /^"([^"\\]|\\["bnrtf\\]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
+      { re: /^"([^"\\]|\\["bnrtf\\\/]|\\u[0-9a-fA-F]{4})*"/, f: fStringDouble },
     ];
 
     // additional stuff
     if (relaxed) {
       ret = ret.concat([
-        { re: /^'(([^'\\]|\\['bnrtf\\]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
+        { re: /^'(([^'\\]|\\['bnrtf\\\/]|\\u[0-9a-fA-F]{4})*)'/, f: fStringSingle },
         { re: /^\/\/.*?(?:\r\n|\r|\n)/, f: fComment },
         { re: /^\/\*[\s\S]*?\*\//, f: fComment },
         { re: /^[$a-zA-Z0-9_\-+\.\*\?!\|&%\^\/#\\]+/, f: fIdentifier },

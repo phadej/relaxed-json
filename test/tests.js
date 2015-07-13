@@ -410,3 +410,15 @@ describe("stringify", function () {
     assert.equal(rjson.stringify(undefined), "null");
   });
 });
+
+describe("regressions", function () {
+  it("forward slash", function () {
+    var data = { foo: "///" };
+    var json = JSON.stringify(data);
+    var jsonEscaped = json.replace(/\//g, "\\\/");
+    assert.deepEqual(rjson.parse(json), data);
+    assert.deepEqual(rjson.parse(jsonEscaped), data);
+    assert.deepEqual(JSON.parse(json), data);
+    assert.deepEqual(JSON.parse(jsonEscaped), data);
+  });
+});
