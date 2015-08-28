@@ -44,19 +44,14 @@
     "disallowSpacesInsideArrayBrackets": "all",
     "disallowSpacesInsideParentheses": true,
 
-    "validateJSDoc": {
-        "checkParamNames": true,
-        "requireParamTypes": true
-    },
-
     "disallowMultipleLineBreaks": true,
 
     "requireParenthesesAroundIIFE": true,
     "maximumLineLength": 300,
     "validateIndentation": 2,
     "validateQuoteMarks": {
-    	"escape": true,
-    	"mark": "\""
+      "escape": true,
+      "mark": "\""
     },
 
     "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",

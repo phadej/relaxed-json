@@ -139,9 +139,10 @@
   function fKeyword(m) {
     var value;
     switch (m[1]) {
-    case "null": value = null; break;
-    case "true": value = true; break;
-    case "false": value = false; break;
+      case "null": value = null; break;
+      case "true": value = true; break;
+      case "false": value = false; break;
+      // no default
     }
     return {
       type: "atom",
@@ -247,14 +248,14 @@
 
   function strToken(token) {
     switch (token.type) {
-    case "atom":
-    case "string":
-    case "number":
-      return token.type + " " + token.match;
-    case "eof":
-      return "end-of-file";
-    default:
-      return "'" + token.type + "'";
+      case "atom":
+      case "string":
+      case "number":
+        return token.type + " " + token.match;
+      case "eof":
+        return "end-of-file";
+      default:
+        return "'" + token.type + "'";
     }
   }
 
@@ -280,7 +281,7 @@
   function skipPunctuation(tokens, state, valid) {
     var punctuation = [",", ":", "]", "}"];
     var token = popToken(tokens, state);
-    while (true) {
+    while (true) { // eslint-disable-line no-constant-condition
       if (valid && valid.indexOf(token.type) !== -1) {
         return token;
       } else if (token.type === "eof") {
@@ -344,50 +345,51 @@
     if (token.type !== "string") {
       raiseUnexpected(state, token, "string");
       switch (token.type) {
-      case ":":
-        token = {
-          type: "string",
-          value: "null",
-          line: token.line,
-        };
+        case ":":
+          token = {
+            type: "string",
+            value: "null",
+            line: token.line,
+          };
 
-        state.pos -= 1;
-        break;
+          state.pos -= 1;
+          break;
 
-      case "number":
-      case "atom":
-        token = {
-          type: "string",
-          value: "" + token.value,
-          line: token.line,
-        };
-        break;
+        case "number":
+        case "atom":
+          token = {
+            type: "string",
+            value: "" + token.value,
+            line: token.line,
+          };
+          break;
 
-      case "[":
-      case "{":
-        state.pos -= 1;
-        value = parseAny(tokens, state);
-        appendPair(state, obj, "null", value);
-        return;
+        case "[":
+        case "{":
+          state.pos -= 1;
+          value = parseAny(tokens, state); // eslint-disable-line no-use-before-define
+          appendPair(state, obj, "null", value);
+          return;
+        // no default
       }
     }
 
     checkDuplicates(state, obj, token);
     key = token.value;
     skipColon(tokens, state);
-    value = parseAny(tokens, state);
+    value = parseAny(tokens, state); // eslint-disable-line no-use-before-define
 
     appendPair(state, obj, key, value);
   }
 
   function parseElement(tokens, state, arr) {
     var key = arr.length;
-    var value = parseAny(tokens, state);
+    var value = parseAny(tokens, state); // eslint-disable-line no-use-before-define
     arr[key] = state.reviver ? state.reviver("" + key, value) : value;
   }
 
   function parseObject(tokens, state) {
-    return parseMany(tokens, state, {}, {
+    return parseMany(tokens, state, {}, { // eslint-disable-line no-use-before-define
       skip: [":", "}"],
       elementParser: parsePair,
       elementName: "string",
@@ -396,7 +398,7 @@
   }
 
   function parseArray(tokens, state) {
-    return parseMany(tokens, state, [], {
+    return parseMany(tokens, state, [], { // eslint-disable-line no-use-before-define
       skip: ["]"],
       elementParser: parseElement,
       elementName: "json object",
@@ -417,17 +419,17 @@
     }
 
     switch (token.type) {
-    case opts.endSymbol:
-      return obj;
+      case opts.endSymbol:
+        return obj;
 
-    default:
-      state.pos -= 1; // push the token back
-      opts.elementParser(tokens, state, obj);
-      break;
+      default:
+        state.pos -= 1; // push the token back
+        opts.elementParser(tokens, state, obj);
+        break;
     }
 
     // Rest
-    while (true) {
+    while (true) { // eslint-disable-line no-constant-condition
       token = popToken(tokens, state);
 
       if (token.type !== opts.endSymbol && token.type !== ",") {
@@ -442,12 +444,13 @@
       }
 
       switch (token.type) {
-      case opts.endSymbol:
-        return obj;
+        case opts.endSymbol:
+          return obj;
 
-      case ",":
-        opts.elementParser(tokens, state, obj);
-        break;
+        case ",":
+          opts.elementParser(tokens, state, obj);
+          break;
+        // no default
       }
     }
   }
@@ -478,17 +481,18 @@
     }
 
     switch (token.type) {
-    case "{":
-      ret = parseObject(tokens, state);
-      break;
-    case "[":
-      ret = parseArray(tokens, state);
-      break;
-    case "string":
-    case "number":
-    case "atom":
-      ret = token.value;
-      break;
+      case "{":
+        ret = parseObject(tokens, state);
+        break;
+      case "[":
+        ret = parseArray(tokens, state);
+        break;
+      case "string":
+      case "number":
+      case "atom":
+        ret = token.value;
+        break;
+      // no default
     }
 
     if (end) {
@@ -502,7 +506,7 @@
   function parse(text, opts) {
     if (typeof opts === "function" || opts === undefined) {
       return JSON.parse(transform(text), opts);
-    } else if (new Object(opts) !== opts) {
+    } else if (new Object(opts) !== opts) { // eslint-disable-line no-new-object
       throw new TypeError("opts/reviver should be undefined, a function or an object");
     }
 
@@ -540,7 +544,7 @@
   }
 
   function stringifyPair(obj, key) {
-    return JSON.stringify(key) + ":" + stringify(obj[key]);
+    return JSON.stringify(key) + ":" + stringify(obj[key]); // eslint-disable-line no-use-before-define
   }
 
   function stringify(obj) {
@@ -549,11 +553,12 @@
       case "number":
       case "boolean":
         return JSON.stringify(obj);
+      // no default
     }
     if (Array.isArray(obj)) {
       return "[" + obj.map(stringify).join(",") + "]";
     }
-    if (new Object(obj) === obj) {
+    if (new Object(obj) === obj) { // eslint-disable-line no-new-object
       var keys = Object.keys(obj);
       keys.sort();
       return "{" + keys.map(stringifyPair.bind(null, obj)) + "}";
