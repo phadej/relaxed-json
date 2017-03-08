@@ -26,7 +26,7 @@ eslint :
 jscs :
 	$(JSCS) $(SRC)
 
-mocha : 
+mocha :
 	$(MOCHA) --reporter=spec test
 
 istanbul :
