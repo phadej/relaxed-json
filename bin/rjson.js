@@ -22,7 +22,7 @@ function cli(argv) {
   if (program.args.length !== 1) {
     console.error("Error: input file is required");
     console.log(program.help());
-    return 0;
+    return 1;
   }
 
   var opts = {
@@ -42,6 +42,8 @@ function cli(argv) {
       console.log(chalk.grey(contents.split(/\n/)[e.line - 1]));
     }
   }
+
+  return 0;
 }
 
 var ret = cli(process.argv);

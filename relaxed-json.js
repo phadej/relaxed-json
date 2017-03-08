@@ -57,6 +57,8 @@
               raw: raw,
               matched: tokenSpec.f(m, line),
             };
+          } else {
+            return undefined;
           }
         });
       }
@@ -123,9 +125,12 @@
 
   function fComment(m) {
     // comments are whitespace, leave only linefeeds
-    return { type: " ", match: m[0].replace(/./g, function (c) {
-      return (/\s/).test(c) ? c : " ";
-    }) };
+    return {
+      type: " ",
+      match: m[0].replace(/./g, function (c) {
+        return (/\s/).test(c) ? c : " ";
+      }),
+    };
   }
 
   function fNumber(m) {
@@ -193,6 +198,7 @@
         return index;
       }
     }
+    return undefined;
   }
 
   function stripTrailingComma(tokens) {

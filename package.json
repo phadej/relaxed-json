@@ -27,14 +27,14 @@
     "test": "make"
   },
   "devDependencies": {
-    "david": "^6.1.4",
-    "eslint": "^1.2.1",
-    "istanbul": "~0.3.0",
-    "jscs": "^2.1.1",
+    "david": "^11.0.0",
+    "eslint": "^3.17.1",
+    "istanbul": "^0.4.5",
+    "jscs": "^3.0.7",
     "jshint": "^2.6.0",
     "jsverify": "^0.7.1",
-    "mocha": "^2.1.0",
-    "uglify-js": "~2.4.13",
+    "mocha": "^3.2.0",
+    "uglify-js": "^2.8.9",
     "underscore": "^1.8.2"
   },
   "keywords": [
