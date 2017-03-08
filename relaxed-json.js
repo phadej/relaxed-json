@@ -582,7 +582,9 @@
   /* global window, module */
   if (typeof window !== "undefined") {
     window.RJSON = RJSON;
-  } else if (typeof module !== "undefined") {
+  }
+
+  if (typeof module !== "undefined") {
     module.exports = RJSON;
   }
 }());

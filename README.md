@@ -46,7 +46,7 @@ $ rjson relaxed-json.js
 Error on line 27: Unexpected character: (
 (function () {
 
-% rjson package.json   
+% rjson package.json
 {
   "name": "relaxed-json",
   "description": "Relaxed JSON is strict superset JSON, relaxing strictness of valilla JSON",
@@ -56,6 +56,10 @@ Error on line 27: Unexpected character: (
 
 ## Changelog
 
+- 1.0.1 &mdash; 2017-03-08 &mdash; Meteor compatibility
+  - [#9](https://github.com/phadej/relaxed-json/issues/9)
+    [#14](https://github.com/phadej/relaxed-json/pull/14)
+    [#15](https://github.com/phadej/relaxed-json/pull/15)
 - 1.0.0 &mdash; 2015-07-13 &mdash; Stable release
   - Forward slashes bug fixed
 - 0.2.9 Dependencies bump
