@@ -75,6 +75,10 @@ describe("transform()", function () {
     it("strips multi-line comments", function () {
       relaxation("[ true,  /* comment \n  */ false]", [true, false]);
     });
+
+    it("allows number as keys", function () {
+      relaxation("{ 0 : 'value'}", { 0 : 'value'});
+    });
   });
 
   describe("error cases", function () {
