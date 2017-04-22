@@ -32,7 +32,8 @@ features helping writing JSON by hand.
   You could pass a reviver function or an options object as the second argument. Supported options:
   - `reviver`: you could still pass a reviver
   - `relaxed`: use relaxed version of JSON (default: true)
-  - `warnings`: use relaxed JSON own parser, supports better error messages (default: false).
+  - `warnings`: use relaxed JSON own parser, supports better error messages (default: false)
+  - `tolerant`: wait until the end to throw errors
   - `duplicate`: fail if there are duplicate keys in objects
 
 ## Executable
