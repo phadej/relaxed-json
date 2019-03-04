@@ -1,4 +1,5 @@
 node_modules
+.nyc_output/
 bower_components
 npm-debug.log
 web.min.css
