@@ -580,11 +580,9 @@
   };
 
   /* global window, module */
-  if (typeof window !== "undefined") {
-    window.RJSON = RJSON;
-  }
-
   if (typeof module !== "undefined") {
     module.exports = RJSON;
+  } else if (typeof window !== "undefined") {
+    window.RJSON = RJSON;
   }
 }());

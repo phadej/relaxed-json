@@ -4,9 +4,8 @@ all : test
 
 BINDIR=node_modules/.bin
 
-MOCHA=$(BINDIR)/mocha
-IMOCHA=$(BINDIR)/_mocha
-ISTANBUL=$(BINDIR)/istanbul
+MOCHA=$(BINDIR)/_mocha
+ISTANBUL=$(BINDIR)/nyc
 JSHINT=$(BINDIR)/jshint
 ESLINT=$(BINDIR)/eslint
 UGLIFY=$(BINDIR)/uglifyjs
@@ -15,26 +14,20 @@ JSCS=$(BINDIR)/jscs
 
 SRC=relaxed-json.js bin/rjson.js
 
-test : jshint eslint jscs mocha istanbul david
-
-jshint :
-	$(JSHINT) $(SRC)
+test : eslint mocha istanbul david
 
 eslint :
 	$(ESLINT) $(SRC)
-
-jscs :
-	$(JSCS) $(SRC)
 
 mocha :
 	$(MOCHA) --reporter=spec test
 
 istanbul :
-	$(ISTANBUL) cover $(IMOCHA) test
+	$(ISTANBUL) $(MOCHA) test
 	$(ISTANBUL) check-coverage --statements -1 --branches -2 --functions 100 --lines -1
 
 uglify : relaxed-json.js
-	$(UGLIFY) -o relaxed-json.min.js --source-map relaxed-json.min.js.map relaxed-json.js
+	$(UGLIFY) relaxed-json.js -o relaxed-json.min.js --source-map
 
 david :
 	$(DAVID)
